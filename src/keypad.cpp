@@ -67,3 +67,14 @@ void handleKeypad() {
         }
     }
 }
+
+
+
+void KeypadTask(void *pvParameters)
+{
+  for (;;)
+  {
+    handleKeypad(); 
+    vTaskDelay(100 / portTICK_PERIOD_MS);
+  }
+}

@@ -12,6 +12,7 @@ extern int detectPin;
 
 
 
+
 void loginDevice(String macAddress)
 {
   while (WiFi.status() == WL_CONNECTED)

@@ -3,6 +3,6 @@
 
 void setupWiFi();
 void checkConnection();
-void hardResetSettings();
+// void hardResetSettings();
 
 #endif

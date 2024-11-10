@@ -10,6 +10,8 @@ extern String rfids[];
 extern String StoredDoorPin;
 extern int detectPin;
 
+
+
 void GetStatusDevice()
 {
     if (WiFi.status() == WL_CONNECTED)
@@ -133,4 +135,17 @@ void getNewPin()
         http.end();
     }
     delay(1000);
+}
+
+
+
+
+void getStatusTask(void *pvParameters)
+{
+    for (;;)
+    {
+        GetStatusDevice();
+        delay(1000);
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+    }
 }

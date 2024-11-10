@@ -23,12 +23,12 @@ String SSID;
 String status_device = "1"; // Status perangkat default
 
 // Array untuk menyimpan data RFID
-String rfids[9999]; 
+String rfids[1000]; 
 int rfidCount = 0;
 
-const char *ssidwifimanager = "Smartdoor002";
+const char *ssidwifimanager = "Smartdoor003";
 const char *passwordwifimanager = "11111111";
-const char *customHostname = "smartdoor002";
+const char *customHostname = "smartdoor003";
 
 //pin efault&yang diganti di respon/epproom
 String StoredDoorPin = "111111"; // dfl

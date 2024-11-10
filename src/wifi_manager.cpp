@@ -35,24 +35,36 @@ void checkConnection()
   }
 }
 
-void hardResetSettings()
-{
+// void hardResetSettings()
+// {
 
-  // resetconfig
-  if (digitalRead(resetpin) == LOW)
+//   // resetconfig
+//   if (digitalRead(resetpin) == LOW)
+//   {
+//     delay(50);
+//     if (digitalRead(resetpin) == LOW)
+//     {
+//       Serial.println("Button Pressed");
+//       delay(3000); // reset delay hold
+//       if (digitalRead(resetpin) == LOW)
+//       {
+//         Serial.println("Button Held");
+//         Serial.println("Erasing Config, restarting");
+//         wm.resetSettings();
+//         ESP.restart();
+//       }
+//     }
+//   }
+// }
+
+
+
+void WiFiTask(void *pvParameters)
+{
+  for (;;)
   {
-    delay(50);
-    if (digitalRead(resetpin) == LOW)
-    {
-      Serial.println("Button Pressed");
-      delay(3000); // reset delay hold
-      if (digitalRead(resetpin) == LOW)
-      {
-        Serial.println("Button Held");
-        Serial.println("Erasing Config, restarting");
-        wm.resetSettings();
-        ESP.restart();
-      }
-    }
+    checkConnection();
+    delay(1000);
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
   }
 }
