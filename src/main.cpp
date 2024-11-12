@@ -3,7 +3,8 @@
 #include <config/apidata.h>
 #include <WiFi.h>
 
-#include "multitask/wifi_task.h"
+// #include "multitask/wifi_task.h"
+#include "wifi_manager.h"
 // #include "rfid.h"
 #include "rfid125.h"
 #include "hardware.h"
@@ -14,7 +15,6 @@
 #include "handleSerialInput.h"
 #include "multitask/keypad_task.h"
 #include "multitask/api_task.h"
-
 
 void midnightTask();
 
@@ -29,49 +29,45 @@ void setup()
 
   setupWiFi();
 
-xTaskCreatePinnedToCore(
-    WiFiTask,
-    "Check Connection Task",
-    3072,
-    NULL,
-    2,
-    &WiFiTaskHandle,
-    0 // Core 0
-);
+  // xTaskCreatePinnedToCore(
+  //     WiFiTask,
+  //     "Check Connection Task",
+  //     3072,
+  //     NULL,
+  //     2,
+  //     &WiFiTaskHandle,
+  //     0 // Core 0
+  // );
 
-xTaskCreatePinnedToCore(
-    getStatusTask,
-    "Status Task",
-    3072,
-    NULL,
-    1,
-    &getStatusTaskHandle,
-    0 // Core 1
-);
+  xTaskCreatePinnedToCore(
+      getStatusTask,
+      "Status Task",
+      3072,
+      NULL,
+      1,
+      &getStatusTaskHandle,
+      0 // Core 1
+  );
 
-xTaskCreatePinnedToCore(
-    KeypadTask,
-    "Handle Keypad Input",
-    2048,
-    NULL,
-    3,
-    &KeypadTaskHandle,
-    1 // Core 1
-);
+  xTaskCreatePinnedToCore(
+      KeypadTask,
+      "Handle Keypad Input",
+      2048,
+      NULL,
+      3,
+      &KeypadTaskHandle,
+      1 // Core 1
+  );
 
-// xTaskCreatePinnedToCore(
-//     KeypadTask,
-//     "Handle Keypad Input",
-//     2048,
-//     NULL,
-//     3,
-//     &KeypadTaskHandle,
-//     1 // Core 1
-// );
-
-
-
-  
+  // xTaskCreatePinnedToCore(
+  //     KeypadTask,
+  //     "Handle Keypad Input",
+  //     2048,
+  //     NULL,
+  //     3,
+  //     &KeypadTaskHandle,
+  //     1 // Core 1
+  // );
 
   pinSetup();
   rfid125Setup();
@@ -124,22 +120,8 @@ void loop()
   // checkConnection();
 
   readRfid125();
+  checkConnection();
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 void midnightTask()
 {
@@ -152,13 +134,16 @@ void midnightTask()
   }
 
   // Cek apakah sekarang sudah jam 00:00
-  if (timeinfo.tm_hour == 0 && timeinfo.tm_min == 0)
+  if ((timeinfo.tm_hour >= 20 && timeinfo.tm_min >= 00 && timeinfo.tm_sec >= 00) && (timeinfo.tm_hour <= 21 && timeinfo.tm_min <= 00 && timeinfo.tm_sec <= 10))
   {
 
-    // proses pengambilan rfid tengah malam
-    getAllRfid();
+    String checkDate = String(timeinfo.tm_mday) + String(timeinfo.tm_mon) + String(timeinfo.tm_year);
 
-    // proses ambil/cek pin baru
-    getNewPin();
+   if (checkDate != date || date == "")
+    {
+      getAllRfid();
+      getNewPin();
+      date = checkDate;
+    }
   }
 }

@@ -10,9 +10,6 @@ extern String rfids[];
 extern String StoredDoorPin;
 extern int detectPin;
 
-
-
-
 void loginDevice(String macAddress)
 {
   while (WiFi.status() == WL_CONNECTED)
@@ -57,8 +54,6 @@ void loginDevice(String macAddress)
   }
 }
 
-
-
 void detectPinSend()
 {
 
@@ -98,4 +93,45 @@ void detectPinSend()
     http.end();
     delay(5000);
   }
+}
+
+// versi perulangan
+void sendHistoryRfid(String rfid)
+{
+
+  if (WiFi.status() == WL_CONNECTED)
+  {
+    HTTPClient http;
+    String url = String(ApiSendHistory);
+    http.begin(url);
+    http.addHeader("Accept", "application/json");
+    http.addHeader("Content-Type", "application/json");
+    http.addHeader("Authorization", "Bearer " + AuthToken);
+
+
+    // Buat payload JSON jika diperlukan
+    String jsonPayload = "{\"uid\":\"" + rfid + "\", \"mac_address\":\"" + macAddress + "\"}";
+
+    int httpResponseCode = http.POST(jsonPayload);
+    Serial.println("mengirim ke: " + url);
+
+    if (httpResponseCode == HTTP_CODE_OK)
+    {
+      String response = http.getString();
+      Serial.println("HTTP Response code: " + String(httpResponseCode));
+      Serial.println("Response: " + response);
+
+    // return true;
+    }
+    else
+    {
+      Serial.print("Error Code: ");
+      Serial.println(httpResponseCode);
+      Serial.println("Kirim akses gagal...");
+    // return false;
+    }
+    http.end();
+    delay(5000);
+  }
+
 }

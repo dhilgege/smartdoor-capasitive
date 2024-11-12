@@ -24,5 +24,6 @@ extern const char *customHostname;
 
 extern String StoredDoorPin;
 
+extern String date;
 
 #endif

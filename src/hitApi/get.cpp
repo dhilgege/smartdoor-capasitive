@@ -10,40 +10,40 @@ extern String rfids[];
 extern String StoredDoorPin;
 extern int detectPin;
 
-
-
 void GetStatusDevice()
 {
     if (WiFi.status() == WL_CONNECTED)
     {
 
-        HTTPClient http;
-        // Buat URL dengan MAC address
-        String url = String(ApiStatusDevice) + "/" + macAddress;
-        Serial.println("URL: " + url); // Cetak URL untuk debugging
-
-        http.begin(url);
-        http.addHeader("Authorization", "Bearer " + AuthToken);
-
-        int httpCode = http.GET();
-        if (httpCode == HTTP_CODE_OK)
+        if (AuthToken)
         {
-            String respon = http.getString();
-            Serial.println("Status device: " + respon);
+            HTTPClient http;
+            // Buat URL dengan MAC address
+            String url = String(ApiStatusDevice) + "/" + macAddress;
+            Serial.println("URL: " + url); // Cetak URL untuk debugging
 
-            // Ambil status device
-            status_device = respon; // Angka 1 atau 0
+            http.begin(url);
+            http.addHeader("Authorization", "Bearer " + AuthToken);
 
-            Serial.println("Status stored: " + status_device);
+            int httpCode = http.GET();
+            if (httpCode == HTTP_CODE_OK)
+            {
+                String respon = http.getString();
+                Serial.println("Status device: " + respon);
+
+                // Ambil status device
+                status_device = respon; // Angka 1 atau 0
+
+                Serial.println("Status stored: " + status_device);
+            }
+            else
+            {
+                Serial.print("Error Code: ");
+                Serial.println(httpCode);
+            }
+            http.end();
         }
-        else
-        {
-            Serial.print("Error Code: ");
-            Serial.println(httpCode);
-        }
-        http.end();
     }
-    delay(1000);
 }
 
 void getAllRfid()
@@ -80,6 +80,7 @@ void getAllRfid()
             rfids[rfidCount] = response.substring(startIndex); // Last RFID
             rfidCount++;
 
+            Serial.println("rfid list" + rfids[rfidCount]);
             Serial.print("Jumlah RFID yang di-download: ");
             Serial.println(rfidCount);
         }
@@ -123,8 +124,6 @@ void getNewPin()
             StoredDoorPin = respon;
 
             Serial.println("Pin stored: " + StoredDoorPin);
-            Serial1.println("PWD:" + StoredDoorPin); // Buka kunci
-            Serial.println("berhasil mengirim pin baru " + StoredDoorPin);
             delay(1000);
         }
         else
@@ -133,12 +132,13 @@ void getNewPin()
             Serial.println(httpCode);
         }
         http.end();
+
+        
     }
     delay(1000);
+
+
 }
-
-
-
 
 void getStatusTask(void *pvParameters)
 {

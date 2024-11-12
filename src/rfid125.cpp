@@ -14,7 +14,7 @@
 
 #include <Gwiot7941e.h>
 #include "hardware.h"
-
+#include <hitApi.h>
 
 #define GWIOT_7941E_RX_PIN 41
 #define READ_LED_PIN 38
@@ -23,7 +23,6 @@ extern int rfidCount;
 extern String rfids[];
 
 String uidStr = ""; // tempat id rfid
-
 
 Gwiot7941e gwiot7941e;
 
@@ -56,7 +55,7 @@ void readRfid125()
     // if non-zero tag_id, update() returns true - a tag was read!
     if (gwiot7941e.update())
     {
-        uidStr = String(gwiot7941e.getLastTagId(), HEX); 
+        uidStr = String(gwiot7941e.getLastTagId(), HEX);
         Serial.print("UID Terbaca: ");
         Serial.println(uidStr);
 
@@ -66,6 +65,8 @@ void readRfid125()
             playSuccessTone();
             ActivateDoorTimer(3000);
             Serial.println("berhasil buka kunci dengan rfid");
+            sendHistoryRfid(uidStr);
+
         }
         else
         {
@@ -74,6 +75,5 @@ void readRfid125()
         }
     }
 
-    delay(50); 
+    delay(50);
 }
-

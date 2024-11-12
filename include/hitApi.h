@@ -7,6 +7,7 @@ void getAllRfid();
 void loginDevice(String macAddress);
 void getNewPin();
 void detectPinSend();
+void sendHistoryRfid(String rfid);
 
 
 
