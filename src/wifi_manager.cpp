@@ -70,3 +70,7 @@ void openWebPortal() {
   }
 }
 
+void resetEpproomWifi() {
+  wm.resetSettings();
+  ESP.restart();
+}

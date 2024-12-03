@@ -7,6 +7,6 @@ void checkConnection();
 void WiFiReconnectTask(void *parameter);
 void openWebPortal();
 void checkButton();
-
+void resetEpproomWifi();
 
 #endif
