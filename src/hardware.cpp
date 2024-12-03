@@ -1,7 +1,9 @@
 #include <Arduino.h>
 
 
-extern int LED_PIN;
+extern int LED_Red;
+extern int LED_Green;
+extern int LED_Yellow;
 extern int DoorPin;
 extern int resetpin;
 extern int detectPin;
@@ -9,14 +11,16 @@ extern int BUZZER_PIN;
 
 void pinSetup()
 {
-    pinMode(LED_PIN, OUTPUT);         // pin LED bawaan
+    pinMode(LED_Red, OUTPUT);         // pin LED bawaan
+    pinMode(LED_Green, OUTPUT);       // pin LED bawaan
+    pinMode(LED_Yellow, OUTPUT);      // pin LED bawaan
     pinMode(DoorPin, OUTPUT);        // pin Relay
     digitalWrite(DoorPin, LOW);
     pinMode(resetpin, INPUT_PULLUP);  // pin Relay
     pinMode(detectPin, INPUT_PULLUP); // pin Relay
 }
 
-void blinkLED(bool state)
+void blinkLedRed(bool state)
 {
     static unsigned long previousMillis = 0;
     const long interval = 500;
@@ -26,12 +30,12 @@ void blinkLED(bool state)
         if (currentMillis - previousMillis >= interval)
         {
             previousMillis = currentMillis;
-            digitalWrite(LED_PIN, !digitalRead(LED_PIN));
+            digitalWrite(LED_Red, !digitalRead(LED_Red));
         }
     }
     else
     {
-        digitalWrite(LED_PIN, LOW);
+        digitalWrite(LED_Red, LOW);
     }
 }
 
@@ -47,18 +51,43 @@ void ActivateDoor(bool state)
     }
 }
 
-void ActivateDoorTimer(int time)
-{
-    digitalWrite(DoorPin, HIGH);
-    Serial.println("Door Opened");
-    delay(time);
-    digitalWrite(DoorPin, LOW);
-    Serial.println("Door Closed");
+// void ActivateDoorTimer(int time)
+// {
+//     digitalWrite(DoorPin, HIGH);
+//     Serial.println("Door Opened");
+//     delay(time);
+//     digitalWrite(DoorPin, LOW);
+//     Serial.println("Door Closed");
+// }
+
+
+void ActivateDoorTimer(int time) {
+unsigned long doorOpenTime = 0;  // Variabel untuk menyimpan waktu saat pintu dibuka
+bool doorOpened = false;         // Status pintu terbuka atau tertutup
+    if (!doorOpened) {  // Jika pintu belum terbuka, buka pintu
+        digitalWrite(DoorPin, HIGH);
+        Serial.println("Door Opened");
+        doorOpenTime = millis(); // Catat waktu saat pintu dibuka
+        doorOpened = true;       // Ubah status pintu menjadi terbuka
+    } else {
+        // Cek apakah durasi membuka pintu telah tercapai
+        if (millis() - doorOpenTime >= time) {
+            digitalWrite(DoorPin, LOW);
+            Serial.println("Door Closed");
+            doorOpened = false; // Reset status pintu
+        }
+    }
 }
+
 
 void playKeypadTone()
 {
     tone(BUZZER_PIN, 1000, 100); // Nada 1000 Hz selama 100 ms
+}
+
+void playResetTone(int time)
+{
+    tone(BUZZER_PIN, 3000, time); // Nada 1000 Hz selama 100 ms
 }
 
 void playSuccessTone()

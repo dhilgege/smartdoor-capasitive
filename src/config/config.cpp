@@ -5,15 +5,19 @@
 // const int TXp2 = 17;
 
 // koneksi modul
-const int LED_PIN = 38; // default red 
-const int LED_PIN_Green = 47; 
-const int LED_PIN_Yellow = 48; 
+const int LED_Red = 38; // default red 
+const int LED_Green = 47; 
+const int LED_Yellow = 48; 
 const int DoorPin = 39;
 const int BUZZER_PIN = 40;
 
 // pin lainnya
 const int detectPin = 12;
 const int resetpin = 200;// belum dipakai
+
+//rfid125
+const int GWIOT_7941E_RX_PIN = 41;
+
 
 String AuthToken;
 
@@ -34,3 +38,5 @@ const char *customHostname = "smartdoor003";
 String StoredDoorPin = "111111"; // dfl
 
 String date = "";
+
+bool updateHistoryInProgress = false; // Status proses pengiriman data

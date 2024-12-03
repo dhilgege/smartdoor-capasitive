@@ -31,7 +31,7 @@ void printLocalTime()
     if (!getLocalTime(&timeinfo))
     {
         Serial.println("No time available (yet)");
-        return;
+        timeSetup();
     }
     // Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
 

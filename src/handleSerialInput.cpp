@@ -1,5 +1,7 @@
 #include <Arduino.h>
 
+#include "wifi_manager.h"
+
 void handleSerialInput(){
 
 if (Serial.available() > 0)
@@ -20,6 +22,12 @@ if (Serial.available() > 0)
         Serial.println("Reseting EPROOM...");
         delay(2000);
         ESP.restart();
+      }else if(select == "3"){
+        Serial.println("Opening Wifi WebClient...");
+        delay(2000);
+        openWebPortal();
+      }else if(select == "4"){
+        // closeWebPortal();
       }
     }
   }

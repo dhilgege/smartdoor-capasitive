@@ -21,6 +21,7 @@
 
 extern int rfidCount;
 extern String rfids[];
+extern bool updateHistoryInProgress;
 
 String uidStr = ""; // tempat id rfid
 
@@ -28,7 +29,6 @@ Gwiot7941e gwiot7941e;
 
 void rfid125Setup()
 {
-    Serial.begin(115200);
 
     pinMode(READ_LED_PIN, OUTPUT);
     digitalWrite(READ_LED_PIN, LOW);
@@ -49,30 +49,39 @@ bool verifyRfid125(const String &uidStr)
     }
     return false; // UID tidak ditemukan
 }
-
 void readRfid125()
 {
-    // if non-zero tag_id, update() returns true - a tag was read!
-    if (gwiot7941e.update())
+    // Cek apakah tidak ada proses update yang sedang berlangsung
+    if (!updateHistoryInProgress)
     {
-        uidStr = String(gwiot7941e.getLastTagId(), HEX);
-        Serial.print("UID Terbaca: ");
-        Serial.println(uidStr);
-
-        // Verifikasi UID dengan data RFID yang di-download
-        if (verifyRfid125(uidStr))
+        // Jika ada tag_id non-zero, update() akan mengembalikan true - sebuah tag terdeteksi!
+        if (gwiot7941e.update())
         {
-            playSuccessTone();
-            ActivateDoorTimer(3000);
-            Serial.println("berhasil buka kunci dengan rfid");
-            sendHistoryRfid(uidStr);
+            uidStr = String(gwiot7941e.getLastTagId(), HEX);
+            Serial.print("UID Terbaca: ");
+            Serial.println(uidStr);
 
+            // Verifikasi UID dengan data RFID yang di-download
+            if (verifyRfid125(uidStr))
+            {
+                playSuccessTone();
+                ActivateDoorTimer(3000);
+                Serial.println("Berhasil buka kunci dengan RFID");
+
+                // Kirim data histori setelah membuka kunci
+                sendHistoryRfid(uidStr);
+            }
+            else
+            {
+                playErrorTone();
+                Serial.println("RFID akses ditolak");
+            }
         }
-        else
-        {
-            playErrorTone();
-            Serial.println("rfid akses ditolak");
-        }
+    }
+    else
+    {
+        Serial.println("Sedang dalam proses update, pembacaan RFID ditunda...");
+        gwiot7941e.end();
     }
 
     delay(50);

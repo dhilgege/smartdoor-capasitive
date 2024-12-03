@@ -7,8 +7,8 @@ void getStatusTask(void *pvParameters);
 
 void loginDevice(String macAddress);
 
-void getAllRfid();
-void getNewPin();
+bool getAllRfid();
+bool getNewPin();
 
 void detectPinSend();
 

@@ -6,6 +6,7 @@ void blinkLED(bool startBlinking);
 void ActivateDoor(bool state);
 void ActivateDoorTimer(int time);
 void playKeypadTone();
+void playResetTone(int time);
 void playSuccessTone();
 void playErrorTone();
 void playChangePWDTone();

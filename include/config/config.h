@@ -4,11 +4,16 @@
 
 // extern const int RXp2;
 // extern const int TXp2;
-extern const int LED_PIN;
+extern const int LED_Red;
+extern const int LED_Green;
+extern const int LED_Yellow;
 extern const int DoorPin;
 extern const int BUZZER_PIN;
 extern const int detectPin;
 extern const int resetpin;
+
+extern const int GWIOT_7941E_RX_PIN;
+
 
 extern String AuthToken;
 extern String macAddress;

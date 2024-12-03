@@ -7,6 +7,6 @@ const char *ApiLogin = "http://site.takumi-ti.my.id/api/logindevice";
 const char *ApiStatusDevice = "http://site.takumi-ti.my.id/api/esp/status_device";
 const char *ApiNewPin = "http://site.takumi-ti.my.id/api/esp/getpin";
 const char *ApiUpdateStatusDevice = "http://site.takumi-ti.my.id/api/esp/update_status_pintu";
-const char *ApiSendHistory = "http://site.takumi-ti.my.id/api/esp/add_history_rfid"; //rfid mac
+const char *ApiSendHistory = "http://site.takumi-ti.my.id/api/esp/add_history_rfid";
 
 
