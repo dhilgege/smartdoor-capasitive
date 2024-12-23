@@ -1,10 +1,13 @@
 #include <SPI.h>     //rfid
 #include <MFRC522.h> //rfid
 #include "hardware.h"
+#include "config/config.h"
+
+extern const int SS_PIN;
+extern const int RST_PIN;
 
 // RFID
-#define SS_PIN 10
-#define RST_PIN 7
+
 MFRC522 mfrc522(SS_PIN, RST_PIN);
 
 extern int rfidCount;
@@ -62,8 +65,8 @@ void cekRfid()
   // Verifikasi UID dengan data RFID yang di-download
   if (verifyRfid(uidStr))
   {
+    ActivateDoorTimer(0);
     playSuccessTone();
-    ActivateDoorTimer(3000);
     Serial.println("berhasil buka kunci dengan rfid");
   }
   else

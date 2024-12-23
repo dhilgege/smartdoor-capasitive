@@ -42,10 +42,11 @@ void handleKeypad()
 
     if (key)
     {
-        if (key == '*')
+        if (key == 'D')
         {
             inputPin = "";
             Serial.println("Input direset.");
+            playDeleteTone();
         }
         else
         {
@@ -60,8 +61,8 @@ void handleKeypad()
                 if (inputPin == StoredDoorPin)
                 {
                     Serial.println("PIN benar! Akses diizinkan.");
+                    ActivateDoorTimer(0);
                     playSuccessTone();
-                    ActivateDoorTimer(3000);
                 }
                 else if (inputPin == "##01##")
                 {
@@ -71,7 +72,7 @@ void handleKeypad()
                 }
                 else if (inputPin == "##02##")
                 {
-                    Serial.println("Restart EEPROOM ESP");
+                    Serial.println("Reset EEPROOM ESP");
                     delay(500);
                     resetEpproomWifi();
                 }

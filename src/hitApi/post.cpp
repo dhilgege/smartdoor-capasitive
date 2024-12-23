@@ -17,12 +17,12 @@ void loginDevice(String macAddress)
   while (WiFi.status() == WL_CONNECTED)
   {
     HTTPClient http;
-    String url = String(ApiLogin) + "/" + macAddress;
+    String url = String(ServerName) + String(ApiLogin) + "/" + macAddress;
     http.begin(url);
     http.addHeader("Accept", "application/json");
     http.addHeader("Content-Type", "application/json");
 
-    // Buat payload JSON jika diperlukan
+    // Buat payload JSON
     String jsonPayload = "{\"mac_address\":\"" + macAddress + "\"}";
 
     int httpResponseCode = http.POST(jsonPayload);
@@ -64,7 +64,7 @@ void detectPinSend()
   {
 
     HTTPClient http;
-    String url = String(ApiUpdateStatusDevice);
+    String url = String(ServerName) + String(ApiUpdateStatusDevice);
     http.begin(url); // Memulai HTTP request ke URL API
     http.addHeader("Accept", "application/json");
     http.addHeader("Content-Type", "application/json");
@@ -107,7 +107,7 @@ bool sendHistoryRfid(String rfid) {
 
         Serial.println("Pengiriman data dimulai, modul RFID dinonaktifkan...");
         HTTPClient http;
-        String url = String(ApiSendHistory);
+        String url = String(ServerName) + String(ApiSendHistory);
         http.begin(url);
         http.addHeader("Accept", "application/json");
         http.addHeader("Content-Type", "application/json");

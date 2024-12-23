@@ -2,6 +2,7 @@
 #include <HTTPClient.h>
 #include <config/apidata.h>
 #include "hitApi.h"
+#include "hardware.h"
 
 extern String AuthToken;
 extern String macAddress;
@@ -20,7 +21,7 @@ void GetStatusDevice()
         {
             HTTPClient http;
             // Buat URL dengan MAC address
-            String url = String(ApiStatusDevice) + "/" + macAddress;
+            String url = String(ServerName) + String(ApiStatusDevice) + "/" + macAddress;
             Serial.println("URL: " + url); // Cetak URL untuk debugging
 
             http.begin(url);
@@ -38,8 +39,8 @@ void GetStatusDevice()
 
                 Serial.println("Status stored: " + status_device);
             }
-            else if(httpCode == HTTP_CODE_NOT_FOUND){
-
+            else if(httpCode == 302){
+                loginDevice(macAddress);
             }
             else
             {
@@ -151,7 +152,8 @@ bool getAllRfid()
     if (WiFi.status() == WL_CONNECTED)
     {
         HTTPClient http;
-        String url = String(ApiAllRfid) + "/" + macAddress;
+        String url = String(ServerName) + String(ApiAllRfid) + "/" + macAddress;
+        playDownloadTone();
         http.begin(url);
         Serial.println("sending to " + url);
         http.addHeader("Authorization", "Bearer " + AuthToken);
@@ -182,12 +184,14 @@ bool getAllRfid()
 
             Serial.print("Jumlah RFID yang di-download: ");
             Serial.println(rfidCount);
+            playSuccessTone();
             return true;
         }
         else
         {
             Serial.print("Error Code: ");
             Serial.println(httpResponseCode);
+            playErrorTone();
             return false;
         }
         http.end();
@@ -205,8 +209,9 @@ bool getNewPin()
     if (WiFi.status() == WL_CONNECTED)
     {
         HTTPClient http;
-        String url = String(ApiNewPin) + "/" + macAddress;
+        String url = String(ServerName) + String(ApiNewPin) + "/" + macAddress;
         Serial.println("URL: " + url); // Debugging
+        playDownloadTone();
 
         http.begin(url);
         http.addHeader("Authorization", "Bearer " + AuthToken);
@@ -219,15 +224,21 @@ bool getNewPin()
             respon.replace("]", "");  // Hapus ']'
             respon.replace("\"", ""); // Hapus '"'
 
-            Serial.println("Pin yang diambil: " + respon);
-            StoredDoorPin = respon; // Simpan PIN yang diambil
-            Serial.println("Pin stored: " + StoredDoorPin);
-            return true;
+            if(respon.length() != 6){
+                respon == "717477";
+            }else{
+                Serial.println("Pin yang diambil: " + respon);
+                StoredDoorPin = respon; // Simpan PIN yang diambil
+                Serial.println("Pin stored: " + StoredDoorPin);
+            };
+                playSuccessTone();
+                return true;
         }
         else
         {
             Serial.print("Error Code: ");
             Serial.println(httpCode);
+            playErrorTone();
             return false;
         }
         http.end();

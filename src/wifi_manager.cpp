@@ -1,6 +1,7 @@
 #include <WiFi.h>
 #include <WiFiManager.h>  // https://github.com/tzapu/WiFiManager
 #include "wifi_manager.h"
+#include "hardware.h"
 
 extern char *customHostname;
 extern char *ssidwifimanager;
@@ -11,17 +12,20 @@ bool portalActive = false; // Status apakah portal WiFi aktif
 
 void setupWifi() {
   delay(1000);
+  TurnOnLed("RED");
   Serial.println("\nStarting");
 
   WiFi.mode(WIFI_STA); // Set WiFi mode ke STA (Station)
 
-  wm.setConnectTimeout(30); // Timeout 30 detik untuk mencoba menyambung ke WiFi
+  wm.setConnectTimeout(600); // Timeout 30 detik untuk mencoba menyambung ke WiFi
 
 
   // Cobalah menyambung ke WiFi yang tersimpan tanpa membuka portal
   bool res = wm.autoConnect(ssidwifimanager, passwordwifimanager);
   if (res) {
     Serial.println("Terkoneksi ke WiFi");
+    TurnOFFLed("RED");
+    TurnOnLed("BLUE");
   } else {
     Serial.println("Gagal menyambung, WiFi tidak tersedia.");
   }
@@ -43,8 +47,13 @@ void WiFiReconnectTask(void *parameter) {
     // Jika WiFi terputus dan portal tidak aktif, maka coba koneksi ulang
     if (!portalActive && WiFi.status() != WL_CONNECTED) {
       Serial.println("WiFi terputus, mencoba menyambungkan kembali...");
+      TurnOnLed("RED");  // belum dimatiin
       WiFi.begin(); // Koneksi ulang dengan SSID dan password tersimpan
       delay(1000);  // Delay 1 detik sebelum pengecekan ulang
+    }
+    else {
+      Serial.println("WiFi tersambung.");
+      TurnOFFLed("RED");
     }
     vTaskDelay(5000 / portTICK_PERIOD_MS); // Cek ulang setiap 5 detik
   }

@@ -4,9 +4,23 @@
 
 // extern const int RXp2;
 // extern const int TXp2;
+
+// led bawaan
 extern const int LED_Red;
 extern const int LED_Green;
 extern const int LED_Yellow;
+
+
+// led external
+extern const int EXT_LED_RED;
+extern const int EXT_LED_GREEN;
+extern const int EXT_LED_BLUE;
+
+//unused rfid 16mhz
+extern const int SS_PIN;
+extern const int RST_PIN;
+
+// etc
 extern const int DoorPin;
 extern const int BUZZER_PIN;
 extern const int detectPin;

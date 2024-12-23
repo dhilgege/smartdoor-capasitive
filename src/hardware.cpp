@@ -1,6 +1,7 @@
 #include <Arduino.h>
 
 
+
 extern int LED_Red;
 extern int LED_Green;
 extern int LED_Yellow;
@@ -8,12 +9,24 @@ extern int DoorPin;
 extern int resetpin;
 extern int detectPin;
 extern int BUZZER_PIN;
+extern int EXT_LED_RED;
+extern int EXT_LED_GREEN;
+extern int EXT_LED_BLUE;
 
-void pinSetup()
-{
-    pinMode(LED_Red, OUTPUT);         // pin LED bawaan
-    pinMode(LED_Green, OUTPUT);       // pin LED bawaan
-    pinMode(LED_Yellow, OUTPUT);      // pin LED bawaan
+void pinSetup(){
+
+    // pin LED bawaan
+    pinMode(LED_Red, OUTPUT);
+    pinMode(LED_Green, OUTPUT);
+    pinMode(LED_Yellow, OUTPUT);
+
+    //pin LED eksternal
+    pinMode(EXT_LED_RED, OUTPUT);
+    pinMode(EXT_LED_GREEN, OUTPUT);
+    pinMode(EXT_LED_BLUE, OUTPUT);
+
+            digitalWrite(EXT_LED_RED, HIGH);
+
     pinMode(DoorPin, OUTPUT);        // pin Relay
     digitalWrite(DoorPin, LOW);
     pinMode(resetpin, INPUT_PULLUP);  // pin Relay
@@ -62,6 +75,7 @@ void ActivateDoor(bool state)
 
 
 void ActivateDoorTimer(int time) {
+    Serial.println("Door Opened"+ time);
 unsigned long doorOpenTime = 0;  // Variabel untuk menyimpan waktu saat pintu dibuka
 bool doorOpened = false;         // Status pintu terbuka atau tertutup
     if (!doorOpened) {  // Jika pintu belum terbuka, buka pintu
@@ -103,6 +117,18 @@ void playErrorTone()
     tone(BUZZER_PIN, 500, 500); // Nada 500 Hz selama 500 ms
     delay(500);
 }
+void playDeleteTone()
+{
+    tone(BUZZER_PIN, 400, 500); // Nada 500 Hz selama 500 ms
+    delay(500);
+}
+
+void playDownloadTone()
+{
+    tone(BUZZER_PIN, 800, 100); // Nada 500 Hz selama 500 ms
+    delay(500);
+}
+
 
 void playChangePWDTone()
 {
@@ -117,8 +143,40 @@ void playChangePWDTone()
     delay(200);                  // Tunggu selama 200 ms
 }
 
+void TurnOnLed(String state)
+{
+    if (state == "RED")
+    {
+        digitalWrite(EXT_LED_RED, HIGH);
+        Serial.println("\nLED RED nyala");
+        Serial.println(digitalRead(EXT_LED_RED));
 
+    }
+    else if (state == "GREEN")
+    {
+        digitalWrite(EXT_LED_GREEN, HIGH);
+    }
+    else if (state == "BLUE")
+    {
+        digitalWrite(EXT_LED_BLUE, HIGH);
+    }
+}
 
+void TurnOFFLed(String state)
+{
+    if (state == "RED")
+    {
+        digitalWrite(EXT_LED_RED, LOW);
+    }
+    else if (state == "GREEN")
+    {
+        digitalWrite(EXT_LED_GREEN, LOW);
+    }
+    else if (state == "BLUE")
+    {
+        digitalWrite(EXT_LED_BLUE, LOW);
+    }
+}
 
 // unsigned long lastToneTime = 0;
 // int toneStep = 0;

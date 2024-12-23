@@ -60,12 +60,14 @@ void readRfid125()
             uidStr = String(gwiot7941e.getLastTagId(), HEX);
             Serial.print("UID Terbaca: ");
             Serial.println(uidStr);
+            TurnOnLed("GREEN");
 
             // Verifikasi UID dengan data RFID yang di-download
             if (verifyRfid125(uidStr))
             {
                 playSuccessTone();
                 ActivateDoorTimer(3000);
+                TurnOFFLed("GREEN");
                 Serial.println("Berhasil buka kunci dengan RFID");
 
                 // Kirim data histori setelah membuka kunci
@@ -74,6 +76,7 @@ void readRfid125()
             else
             {
                 playErrorTone();
+                TurnOFFLed("GREEN");
                 Serial.println("RFID akses ditolak");
             }
         }
