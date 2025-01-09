@@ -3,10 +3,12 @@
 #define HIT_API
 
 void GetStatusDevice();
-void getAllRfid();
+bool getAllRfid();
 void loginDevice(String macAddress);
-void getNewPin();
+bool getNewPin();
 void detectPinSend();
+bool sendHistoryRfid(String rfid);
+
 
 
 

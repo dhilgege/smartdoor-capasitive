@@ -1,139 +1,193 @@
+// include lib dari luar
 #include <Arduino.h>
 #include <config/apidata.h>
 #include <WiFi.h>
 
+// #include "multitask/wifi_task.h"
 #include "wifi_manager.h"
-#include "rfid.h"
+// #include "rfid.h"
+#include "rfid125.h"
 #include "hardware.h"
 #include "config/config.h"
 #include "hitApi.h"
 #include "fungsi_keypad.h"
-
-
-// librarinya
-#include "time.h"     //time
-#include "esp_sntp.h" //time
-
-
-
-// real time clock
-const char *ntpServer1 = "pool.ntp.org";
-const char *ntpServer2 = "time.nist.gov";
-const long gmtOffset_sec = 25200;
-const int daylightOffset_sec = 0;
-
-const char *time_zone = "CET-1CEST,M3.5.0,M10.5.0/3"; // TimeZone rule for Europe/Rome including daylight adjustment rules (optional)
-
-void printLocalTime()
-{
-  struct tm timeinfo;
-  if (!getLocalTime(&timeinfo))
-  {
-    Serial.println("No time available (yet)");
-    return;
-  }
-  Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
-}
-void timeavailable(struct timeval *t)
-{
-  Serial.println("Got time adjustment from NTP!");
-  printLocalTime();
-}
+#include "timeServer.h"
+#include "handleSerialInput.h"
+#include "multitask/keypad_task.h"
+#include "multitask/api_task.h"
 
 void midnightTask();
 
+TaskHandle_t WiFiTaskHandle;
+TaskHandle_t getStatusTaskHandle;
+TaskHandle_t KeypadTaskHandle;
+
 void setup()
 {
-  Serial.begin(115200);                        // Initialize serial communications with the PC
-  // Serial1.begin(9600, SERIAL_8N1, RXp2, TXp2); // Initialize serial communications with the PC
+    Serial.begin(115200); // Initialize serial communications with the PC
+                          // Serial1.begin(9600, SERIAL_8N1, RXp2, TXp2); // Initialize serial communications with the PC
 
-  pinSetup();
-  setupRfid();
-  setupWiFi();
-  checkConnection();
+    ActivateDoor(false);
 
-  // Dapatkan MAC address ESP32
-  macAddress = WiFi.macAddress();
+    setupWifi();
 
-  // time
-  //  set notification call-back function
-  sntp_set_time_sync_notification_cb(timeavailable);
-  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer1, ntpServer2);
+    // xTaskCreatePinnedToCore(
+    //     WiFiTask,
+    //     "Check Connection Task",
+    //     3072,
+    //     NULL,
+    //     2,
+    //     &WiFiTaskHandle,
+    //     0 // Core 0
+    // );
 
-  Serial.println("Nama WiFi: " + String(WiFi.SSID()));
-  Serial.println("IP Address sekarang: " + WiFi.localIP().toString());
-  Serial.println("MAC Address: " + macAddress);
-  Serial.println("Hostname ESP32: " + String(WiFi.getHostname()));
+    xTaskCreatePinnedToCore(
+        getStatusTask,
+        "Status Task",
+        4096,
+        NULL,
+        1,
+        &getStatusTaskHandle,
+        0 // Core 1
+    );
 
-  loginDevice(macAddress);
+    xTaskCreatePinnedToCore(
+        KeypadTask,
+        "Handle Keypad Input",
+        8192,
+        NULL,
+        3,
+        &KeypadTaskHandle,
+        1 // Core 1
+    );
 
-  // Tampilkan token yang didapat
-  getAllRfid(); // Download semua data RFID setelah login
-  getNewPin();  // ambil pin baru
+    // xTaskCreatePinnedToCore(
+    //     KeypadTask,
+    //     "Handle Keypad Input",
+    //     2048,
+    //     NULL,
+    //     3,
+    //     &KeypadTaskHandle,
+    //     1 // Core 1
+    // );
+
+    pinSetup();
+    rfid125Setup();
+    // setupRfid();
+    // checkConnection();
+
+    // Dapatkan MAC address ESP32
+    macAddress = WiFi.macAddress();
+
+    // time
+    timeSetup();
+
+    Serial.println("Nama WiFi: " + String(WiFi.SSID()));
+    Serial.println("IP Address sekarang: " + WiFi.localIP().toString());
+    Serial.println("MAC Address: " + macAddress);
+    Serial.println("Hostname ESP32: " + String(WiFi.getHostname()));
+
+    loginDevice(macAddress);
+
+    // Tampilkan token yang didapat
+    getAllRfid(); // Download semua data RFID setelah login
+    getNewPin();  // ambil pin baru
 }
 
 void loop()
 {
 
-  handleKeypad();
+    handleKeypad(); // harusnya dihapus
 
-  if (Serial.available() > 0) {
-    String command = Serial.readStringUntil('\n');
-    if (command == "restartsekarang") {
-      Serial.println("Restarting...");
-      ESP.restart();
+    handleSerialInput();
+
+    // Serial.println("AuthToken: " + AuthToken);
+    printLocalTime(); // it will take some time to sync time :)
+
+    // Pemeriksaan status device
+    // GetStatusDevice();
+
+    // tugas tengah malem
+    midnightTask();
+
+    // hardResetSettings();
+
+    if (status_device == "0")
+    {
+        ActivateDoor(true);
     }
-  }
+    else if (status_device == "1")
+    {
+        ActivateDoor(false);
+    }
+    //   ActivateDoor(false);
+    // Serial.println("pintu ditutup.HIGH");
 
-  // detectPinSend();
+    // checkConnection();
 
-  Serial.println("AuthToken: " + AuthToken);
-  printLocalTime(); // it will take some time to sync time :)
-
-  // Pemeriksaan status device
-  GetStatusDevice();
-
-  // tugas tengah malem
-  midnightTask();
-
-  // hardResetSettings();
-
-
-  if (status_device == "0")
-  {
-    ActivateDoorTimer(3000);
-  }
-  ActivateDoor(false);
-  Serial.println("pintu ditutup.HIGH");
-
-  checkConnection();
-
-  cekRfid();
+    readRfid125();
+    //   checkConnection();
 }
 
+// void midnightTask()
+// {
+//   // Dapatkan waktu lokal
+//   struct tm timeinfo;
+//   if (!getLocalTime(&timeinfo))
+//   {
+//     Serial.println("Waktu lokal belum tersedia");
+//     return;
+//   }
 
+//   // Cek apakah sekarang sudah jam 00:00
+//   if ((timeinfo.tm_hour >= 20 && timeinfo.tm_min >= 00 && timeinfo.tm_sec >= 00) && (timeinfo.tm_hour <= 21 && timeinfo.tm_min <= 00 && timeinfo.tm_sec <= 10))
+//   {
 
+//     String checkDate = String(timeinfo.tm_mday) + String(timeinfo.tm_mon) + String(timeinfo.tm_year);
 
+//    if (checkDate != date || date == "")
+//     {
+//       getAllRfid();
+//       getNewPin();
+//       date = checkDate;
+//     }
+//   }
+// }
+
+int lastUpdateDay = -1;        // Hari terakhir update
+bool updateInProgress = false; // Cegah duplikasi pengambilan data
 
 void midnightTask()
 {
-  // Dapatkan waktu lokal
-  struct tm timeinfo;
-  if (!getLocalTime(&timeinfo))
-  {
-    Serial.println("Waktu lokal belum tersedia");
-    return;
-  }
+    // Dapatkan waktu lokal
+    struct tm timeinfo;
+    if (!getLocalTime(&timeinfo))
+    {
+        Serial.println("Waktu lokal belum tersedia");
+        return;
+    }
 
-  // Cek apakah sekarang sudah jam 00:00
-  if (timeinfo.tm_hour == 0 && timeinfo.tm_min == 0)
-  {
+    // Cek apakah hari telah berganti dan sudah masuk jam 00:00
+    if (timeinfo.tm_hour == 13 && timeinfo.tm_min == 26)
+    {
+        // Cek apakah pengambilan data sudah dilakukan hari ini
+        if (lastUpdateDay != timeinfo.tm_mday && !updateInProgress)
+        {
+            updateInProgress = true; // Tandai bahwa proses update sedang berlangsung
+            Serial.println("Memulai pengambilan data RFID dan PIN baru...");
 
-    // proses pengambilan rfid tengah malam
-    getAllRfid();
+            // Ulangi pengambilan data hingga berhasil
+            while (!getAllRfid() || !getNewPin())
+            {
+                Serial.println("Pengambilan data gagal, mencoba ulang...");
+                delay(5000); // Tunggu sebelum mencoba lagi
+            }
 
-    // proses ambil/cek pin baru
-    getNewPin();
-  }
+            // Jika berhasil, simpan hari terakhir update
+            lastUpdateDay = timeinfo.tm_mday;
+            Serial.println("Pengambilan data berhasil!");
+
+            updateInProgress = false; // Reset status proses update
+        }
+    }
 }
-
