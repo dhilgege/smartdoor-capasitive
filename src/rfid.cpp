@@ -1,3 +1,5 @@
+//UNUSED FILE, WORKING BUT NOT IN USE
+
 #include <SPI.h>     //rfid
 #include <MFRC522.h> //rfid
 #include "hardware.h"
