@@ -1,0 +1,44 @@
+// POST
+
+
+
+// GET
+void GetStatusDevice()
+{
+    if (WiFi.status() == WL_CONNECTED)
+    {
+
+        if (AuthToken)
+        {
+            HTTPClient http;
+            // Buat URL dengan MAC address
+            String url = String(ServerName) + String(ApiStatusDevice) + "/" + macAddress;
+            Serial.println("URL: " + url); // Cetak URL untuk debugging
+
+            http.begin(url);
+            http.addHeader("Authorization", "Bearer " + AuthToken);
+
+            int httpCode = http.GET();
+            
+            if (httpCode == HTTP_CODE_OK)
+            {
+                String respon = http.getString();
+                Serial.println("Status device: " + respon);
+
+                // Ambil status device
+                status_device = respon; // Angka 1 atau 0
+
+                Serial.println("Status stored: " + status_device);
+            }
+            else if(httpCode == 302){
+                loginDevice(macAddress);
+            }
+            else
+            {
+                Serial.print("Error Code: ");
+                Serial.println(httpCode);
+            }
+            http.end();
+        }
+    }
+}

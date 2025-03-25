@@ -68,7 +68,7 @@ void cekRfid()
   // Verifikasi UID dengan data RFID yang di-download
   if (verifyRfid(uidStr))
   {
-    ActivateDoorTimer(0);
+    ActivateDoorTimer(3000);
     playSuccessTone();
     Serial.println("berhasil buka kunci dengan rfid");
   }

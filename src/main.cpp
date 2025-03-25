@@ -24,9 +24,7 @@ TaskHandle_t KeypadTaskHandle;
 
 void setup()
 {
-    Serial.begin(115200); // Initialize serial communications with the PC
-                          // Serial1.begin(9600, SERIAL_8N1, RXp2, TXp2); // Initialize serial communications with the PC
-
+    Serial.begin(115200);
     ActivateDoor(false);
 
     setupWifi();
@@ -128,31 +126,6 @@ void loop()
     readRfid125();
     //   checkConnection();
 }
-
-// void midnightTask()
-// {
-//   // Dapatkan waktu lokal
-//   struct tm timeinfo;
-//   if (!getLocalTime(&timeinfo))
-//   {
-//     Serial.println("Waktu lokal belum tersedia");
-//     return;
-//   }
-
-//   // Cek apakah sekarang sudah jam 00:00
-//   if ((timeinfo.tm_hour >= 20 && timeinfo.tm_min >= 00 && timeinfo.tm_sec >= 00) && (timeinfo.tm_hour <= 21 && timeinfo.tm_min <= 00 && timeinfo.tm_sec <= 10))
-//   {
-
-//     String checkDate = String(timeinfo.tm_mday) + String(timeinfo.tm_mon) + String(timeinfo.tm_year);
-
-//    if (checkDate != date || date == "")
-//     {
-//       getAllRfid();
-//       getNewPin();
-//       date = checkDate;
-//     }
-//   }
-// }
 
 int lastUpdateDay = -1;        // Hari terakhir update
 bool updateInProgress = false; // Cegah duplikasi pengambilan data

@@ -267,3 +267,46 @@ void getStatusTask(void *pvParameters)
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 }
+
+
+
+
+
+
+
+void GET()
+{
+    String response;
+    if (WiFi.status() == WL_CONNECTED)
+    {
+        if (AuthToken)
+        {
+            HTTPClient http;
+            String url = "http://localhost:8000/api/getdata" + macAddress;
+            Serial.println("URL: " + url); // Cetak URL untuk debugging
+
+            http.begin(url); // mulai get
+            http.addHeader("Authorization", "Bearer " + AuthToken); // kalau mau ada header
+
+            int httpCode = http.GET(); // ambil respon kode> 200,500,404 dll
+            
+            if (httpCode == HTTP_CODE_OK) // kalau kode ok atau di range 200 an
+            {
+                String respon = http.getString(); // ambil data yg didapat
+                Serial.println(respon); //responnya
+
+                // Ambil status device
+                response = respon; // Angka 1 atau 0
+            }
+            else if(httpCode == 302){ //kasi kondisi khusus
+                loginDevice(macAddress);
+            }
+            else
+            {
+                Serial.print("Error Code: ");
+                Serial.println(httpCode);
+            }
+            http.end();
+        }
+    }
+}

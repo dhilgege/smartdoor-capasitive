@@ -61,7 +61,7 @@ void handleKeypad()
                 if (inputPin == StoredDoorPin)
                 {
                     Serial.println("PIN benar! Akses diizinkan.");
-                    ActivateDoorTimer(0);
+                    ActivateDoorTimer(3000);
                     playSuccessTone();
                 }
                 else if (inputPin == "##01##")
