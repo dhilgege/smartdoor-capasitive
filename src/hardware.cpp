@@ -102,6 +102,11 @@ void playKeypadTone()
 void playResetTone(int time)
 {
     tone(BUZZER_PIN, 3000, time); // Nada 3000 Hz selama 100 ms
+    delay(500);
+    tone(BUZZER_PIN, 3000, time); // Nada 3000 Hz selama 100 ms
+    delay(500);
+    tone(BUZZER_PIN, 3000, time); // Nada 3000 Hz selama 100 ms
+    delay(500);
 }
 
 void playSuccessTone()

@@ -17,7 +17,7 @@ void setupWifi() {
 
   WiFi.mode(WIFI_STA); // Set WiFi mode ke STA (Station)
 
-  wm.setConnectTimeout(600); // Timeout 30 detik untuk mencoba menyambung ke WiFi
+  // wm.setConnectTimeout(600); // Timeout 30 detik untuk mencoba menyambung ke WiFi
 
 
   // Cobalah menyambung ke WiFi yang tersimpan tanpa membuka portal
@@ -30,24 +30,26 @@ void setupWifi() {
     Serial.println("Gagal menyambung, WiFi tidak tersedia.");
   }
 
-  // Mulai task untuk memeriksa koneksi WiFi secara otomatis
-  xTaskCreatePinnedToCore(
-    WiFiReconnectTask,       // Fungsi task
-    "WiFiReconnectTask",     // Nama task
-    4096,                    // Ukuran stack
-    NULL,                    // Parameter untuk task
-    1,                       // Prioritas task
-    NULL,                    // Handle task
-    1                        // Jalankan di core 1
-  );
+  // // Mulai task untuk memeriksa koneksi WiFi secara otomatis
+  // xTaskCreatePinnedToCore(
+  //   WiFiReconnectTask,       // Fungsi task
+  //   "WiFiReconnectTask",     // Nama task
+  //   4096,                    // Ukuran stack
+  //   NULL,                    // Parameter untuk task
+  //   1,                       // Prioritas task
+  //   NULL,                    // Handle task
+  //   1                        // Jalankan di core 1
+  // );
 }
 
 void WiFiReconnectTask(void *parameter) {
   for (;;) {
     // Jika WiFi terputus dan portal tidak aktif, maka coba koneksi ulang
-    if (!portalActive && WiFi.status() != WL_CONNECTED) {
+    if (WiFi.status() != WL_CONNECTED) {
       Serial.println("WiFi terputus, mencoba menyambungkan kembali...");
       TurnOnLed("RED");  // belum dimatiin
+      Serial.println(ssidwifimanager);
+      Serial.println(passwordwifimanager);
       WiFi.begin(); // Koneksi ulang dengan SSID dan password tersimpan
       delay(1000);  // Delay 1 detik sebelum pengecekan ulang
     }
@@ -57,6 +59,21 @@ void WiFiReconnectTask(void *parameter) {
     }
     vTaskDelay(5000 / portTICK_PERIOD_MS); // Cek ulang setiap 5 detik
   }
+
+  // for (;;) {
+  //   // Jika WiFi terputus dan portal tidak aktif, maka coba koneksi ulang
+  //   if (!portalActive && WiFi.status() != WL_CONNECTED) {
+  //     Serial.println("WiFi terputus, mencoba menyambungkan kembali...");
+  //     TurnOnLed("RED");  // belum dimatiin
+  //     WiFi.begin(); // Koneksi ulang dengan SSID dan password tersimpan
+  //     delay(1000);  // Delay 1 detik sebelum pengecekan ulang
+  //   }
+  //   else {
+  //     Serial.println("WiFi tersambung.");
+  //     TurnOFFLed("RED");
+  //   }
+  //   vTaskDelay(5000 / portTICK_PERIOD_MS); // Cek ulang setiap 5 detik
+  // }
 }
 
 void openWebPortal() {
@@ -79,7 +96,8 @@ void openWebPortal() {
   }
 }
 
+
 void resetEpproomWifi() {
   wm.resetSettings();
-  ESP.restart();
+  // ESP.restart();
 }

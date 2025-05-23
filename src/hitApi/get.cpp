@@ -28,7 +28,7 @@ void GetStatusDevice()
             http.addHeader("Authorization", "Bearer " + AuthToken);
 
             int httpCode = http.GET();
-            
+
             if (httpCode == HTTP_CODE_OK)
             {
                 String respon = http.getString();
@@ -39,7 +39,8 @@ void GetStatusDevice()
 
                 Serial.println("Status stored: " + status_device);
             }
-            else if(httpCode == 302){
+            else if (httpCode == 302)
+            {
                 loginDevice(macAddress);
             }
             else
@@ -134,20 +135,17 @@ void GetStatusDevice()
 //         }
 //         else
 //         {
-//             Serial.print("Error Code: ");
-//             Serial.println(httpCode);
-//         }
-//         http.end();
-
-        
-//     }
-//     delay(1000);
-
-
-// }
-
-
-bool getAllRfid()
+    //             Serial.print("Error Code: ");
+    //             Serial.println(httpCode);
+    //         }
+    //         http.end();
+    
+    //     }
+    //     delay(1000);
+    
+    // }
+    
+    bool getAllRfid()
 {
     if (WiFi.status() == WL_CONNECTED)
     {
@@ -157,20 +155,20 @@ bool getAllRfid()
         http.begin(url);
         Serial.println("sending to " + url);
         http.addHeader("Authorization", "Bearer " + AuthToken);
-
+        
         int httpResponseCode = http.GET();
         if (httpResponseCode == HTTP_CODE_OK)
         {
             String response = http.getString();
             Serial.println("RFID Response: " + response);
-
+            
             response.replace("[", "");  // Hapus '['
             response.replace("]", "");  // Hapus ']'
             response.replace("\"", ""); // Hapus '"'
-
+            
             int startIndex = 0;
             int endIndex = response.indexOf(',');
-
+            
             rfidCount = 0;
             while (endIndex != -1)
             {
@@ -181,11 +179,16 @@ bool getAllRfid()
             }
             rfids[rfidCount] = response.substring(startIndex); // RFID terakhir
             rfidCount++;
-
+            
             Serial.print("Jumlah RFID yang di-download: ");
             Serial.println(rfidCount);
             playSuccessTone();
             return true;
+        }
+        else if (httpResponseCode == 302)
+        {
+            loginDevice(macAddress);
+            return false;
         }
         else
         {
@@ -198,7 +201,7 @@ bool getAllRfid()
     }
     else
     {
-        Serial.println("WiFi Disconnected");
+        Serial.println("GetRfid Wifi Disconect");
         // checkConnection();
         return false;
     }
@@ -212,10 +215,10 @@ bool getNewPin()
         String url = String(ServerName) + String(ApiNewPin) + "/" + macAddress;
         Serial.println("URL: " + url); // Debugging
         playDownloadTone();
-
+        
         http.begin(url);
         http.addHeader("Authorization", "Bearer " + AuthToken);
-
+        
         int httpCode = http.GET();
         if (httpCode == HTTP_CODE_OK)
         {
@@ -223,16 +226,24 @@ bool getNewPin()
             respon.replace("[", "");  // Hapus '['
             respon.replace("]", "");  // Hapus ']'
             respon.replace("\"", ""); // Hapus '"'
-
-            if(respon.length() != 6){
+            
+            if (respon.length() != 6)
+            {
                 respon == "717477";
-            }else{
+            }
+            else
+            {
                 Serial.println("Pin yang diambil: " + respon);
                 StoredDoorPin = respon; // Simpan PIN yang diambil
                 Serial.println("Pin stored: " + StoredDoorPin);
             };
-                playSuccessTone();
-                return true;
+            playSuccessTone();
+            return true;
+        }
+        else if (httpCode == 302)
+        {
+            loginDevice(macAddress);
+            return false;
         }
         else
         {
@@ -245,34 +256,28 @@ bool getNewPin()
     }
     else
     {
-        Serial.println("WiFi Disconnected");
+        Serial.println("GetNewPin: WiFi Disconnected");
         // checkConnection();
         return false;
     }
 }
 
-
-
 void getStatusTask(void *pvParameters)
 {
     for (;;)
     {
-        if(WiFi.status() == WL_CONNECTED){
-        GetStatusDevice();
-        delay(1000);
+        if (WiFi.status() == WL_CONNECTED)
+        {
+            GetStatusDevice();
+            delay(1000);
         }
-        else{
-            Serial.println("Wifi terputus, menuggu koneksi");
+        else
+        {
+            Serial.println("Wifi terputus, gagal ambil status");
         }
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 }
-
-
-
-
-
-
 
 void GET()
 {
@@ -285,20 +290,21 @@ void GET()
             String url = "http://localhost:8000/api/getdata" + macAddress;
             Serial.println("URL: " + url); // Cetak URL untuk debugging
 
-            http.begin(url); // mulai get
+            http.begin(url);                                        // mulai get
             http.addHeader("Authorization", "Bearer " + AuthToken); // kalau mau ada header
 
             int httpCode = http.GET(); // ambil respon kode> 200,500,404 dll
-            
+
             if (httpCode == HTTP_CODE_OK) // kalau kode ok atau di range 200 an
             {
                 String respon = http.getString(); // ambil data yg didapat
-                Serial.println(respon); //responnya
+                Serial.println(respon);           // responnya
 
                 // Ambil status device
                 response = respon; // Angka 1 atau 0
             }
-            else if(httpCode == 302){ //kasi kondisi khusus
+            else if (httpCode == 302)
+            { // kasi kondisi khusus
                 loginDevice(macAddress);
             }
             else

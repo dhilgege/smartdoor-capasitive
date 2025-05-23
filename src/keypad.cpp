@@ -66,15 +66,26 @@ void handleKeypad()
                 }
                 else if (inputPin == "##01##")
                 {
+                    playResetTone(200);
                     Serial.println("Restart Device");
                     delay(500);
                     ESP.restart();
                 }
                 else if (inputPin == "##02##")
                 {
+                    playResetTone(200);
                     Serial.println("Reset EEPROOM ESP");
                     delay(500);
                     resetEpproomWifi();
+                }
+                else if (inputPin == "##03##")
+                {
+                    playResetTone(200);
+                    Serial.println("Resseting Wifi & Setup Wifi");
+                    delay(500);
+                    resetEpproomWifi();
+                    setupWifi();
+
                 }
                 else
                 {
