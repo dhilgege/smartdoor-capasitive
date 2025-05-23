@@ -12,6 +12,11 @@ extern int BUZZER_PIN;
 extern int EXT_LED_RED;
 extern int EXT_LED_GREEN;
 extern int EXT_LED_BLUE;
+extern unsigned long doorTimerStart;
+extern int doorTimerDuration;
+extern bool doorTimerActive;
+
+
 
 void pinSetup(){
 
@@ -74,24 +79,15 @@ void ActivateDoor(bool state)
 // }
 
 
-void ActivateDoorTimer(int time) {
-    Serial.println("Door Opened"+ time);
-unsigned long doorOpenTime = 0;  // Variabel untuk menyimpan waktu saat pintu dibuka
-bool doorOpened = false;         // Status pintu terbuka atau tertutup
-    if (!doorOpened) {  // Jika pintu belum terbuka, buka pintu
-        digitalWrite(DoorPin, HIGH);
-        Serial.println("Door Opened");
-        doorOpenTime = millis(); // Catat waktu saat pintu dibuka
-        doorOpened = true;       // Ubah status pintu menjadi terbuka
-    } else {
-        // Cek apakah durasi membuka pintu telah tercapai
-        if (millis() - doorOpenTime >= time) {
-            digitalWrite(DoorPin, LOW);
-            Serial.println("Door Closed");
-            doorOpened = false; // Reset status pintu
-        }
-    }
+void ActivateDoorTimer(int duration) {
+    // digitalWrite(DoorPin, HIGH);
+    ActivateDoor(true); // Menggunakan fungsi ActivateDoor
+    Serial.println("Door Opened");
+    doorTimerStart = millis();
+    doorTimerDuration = duration;
+    doorTimerActive = true;
 }
+
 
 
 void playKeypadTone()

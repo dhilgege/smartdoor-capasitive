@@ -24,6 +24,9 @@ TaskHandle_t getStatusTaskHandle;
 TaskHandle_t KeypadTaskHandle;
 
 bool getOneTimeDone;
+extern unsigned long doorTimerStart;
+extern int doorTimerDuration;
+extern bool doorTimerActive;
 
 void setup()
 {
@@ -89,25 +92,29 @@ void setup()
 
 void loop()
 {
+    if (doorTimerActive && millis() - doorTimerStart >= doorTimerDuration)
+    {
+        ActivateDoor(false); // Matikan pintu setelah waktu habis
+        Serial.println("Door Closed");
+        doorTimerActive = false;
+    }
+    if (status_device == "0" && !doorTimerActive)
+    {
+        ActivateDoorTimer(3000); // buka 3 detik by API
+        Serial.println("Door open by API (timer)");
+        status_device = "-1"; // supaya gak terus-terusan aktif
+    }
+
     getOneTime();
     // handleKeypad(); // harusnya dihapus
     handleSerialInput();
     printLocalTime(); // it will take some time to sync time :)
     midnightTask();
-    if (status_device == "0")
-    {
-        ActivateDoor(true);
-    }
-    else if (status_device == "1")
-    {
-        ActivateDoor(false);
-    }
     readRfid125();
 }
 
 int lastUpdateDay = -1;        // Hari terakhir update
 bool updateInProgress = false; // Cegah duplikasi pengambilan data
-
 
 void midnightTask()
 {
@@ -130,37 +137,29 @@ void midnightTask()
     }
 }
 
-
-
-void getOneTime() {
-    if (getOneTimeDone == false) {
+void getOneTime()
+{
+    if (getOneTimeDone == false)
+    {
         Serial.println("Memulai getOneTime...");
-        if (getNewPin()) {
-            if (getAllRfid()) {
+        if (getNewPin())
+        {
+            if (getAllRfid())
+            {
                 getOneTimeDone = true;
                 Serial.println("getOneTime selesai dan sukses ✅");
-            } else {
+            }
+            else
+            {
                 Serial.println("Gagal getAllRfid ❌");
             }
-        } else {
+        }
+        else
+        {
             Serial.println("Gagal getNewPin ❌");
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // void midnightTask()
 // {

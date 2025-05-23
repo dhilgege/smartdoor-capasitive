@@ -52,3 +52,8 @@ String StoredDoorPin = "111111"; // dfl
 String date = "";
 
 bool updateHistoryInProgress = false; // Status proses pengiriman data
+
+
+unsigned long doorTimerStart = 0;
+int doorTimerDuration = 0;
+bool doorTimerActive = false;

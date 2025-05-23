@@ -69,7 +69,6 @@ void readRfid125()
                 ActivateDoorTimer(3000);
                 TurnOFFLed("GREEN");
                 Serial.println("Berhasil buka kunci dengan RFID");
-
                 // Kirim data histori setelah membuka kunci
                 sendHistoryRfid(uidStr);
             }
