@@ -3,7 +3,7 @@
 
 
 // GET
-void GetStatusDevice()
+void getStatusAndPinDevice()
 {
     if (WiFi.status() == WL_CONNECTED)
     {

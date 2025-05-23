@@ -1,3 +1,19 @@
+// Aktifkan ini untuk debug
+#define DEBUG_MODE
+// Aktifkan ini untuk debug
+
+#ifdef DEBUG_MODE
+  #define DEBUG_PRINT(x)    Serial.print(x)
+  #define DEBUG_PRINTLN(x)  Serial.println(x)
+  #define DEBUG_PRINTF(...) Serial.printf(__VA_ARGS__)
+#else
+  #define DEBUG_PRINT(x)
+  #define DEBUG_PRINTLN(x)
+  #define DEBUG_PRINTF(...)
+#endif
+
+
+
 // include lib dari luar
 #include <Arduino.h>
 #include <config/apidata.h>
@@ -24,9 +40,9 @@ TaskHandle_t getStatusTaskHandle;
 TaskHandle_t KeypadTaskHandle;
 
 bool getOneTimeDone;
-extern unsigned long doorTimerStart;
-extern int doorTimerDuration;
-extern bool doorTimerActive;
+// extern unsigned long doorTimerStart;
+// extern int doorTimerDuration;
+// extern bool doorTimerActive;
 
 void setup()
 {

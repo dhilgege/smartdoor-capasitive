@@ -45,4 +45,8 @@ extern String StoredDoorPin;
 
 extern String date;
 
+extern unsigned long doorTimerStart;
+extern int doorTimerDuration;
+extern bool doorTimerActive;
+
 #endif

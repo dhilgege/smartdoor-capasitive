@@ -11,3 +11,4 @@ const char *ApiStatusDevice = "/api/esp/status_device";
 const char *ApiNewPin = "/api/esp/getpin";
 const char *ApiUpdateStatusDevice = "/api/esp/update_status_pintu";
 const char *ApiSendHistory = "/api/esp/add_history_rfid";
+const char *ApiStatusAndPinDevice = "/api/esp/status_pin_device";
