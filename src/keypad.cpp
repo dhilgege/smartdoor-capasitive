@@ -13,19 +13,23 @@
 */
 
 #include <Keypad.h>
-
+#include "config/config.h"
 #include "hardware.h"
 #include "wifi_manager.h"
+#include "otaHandleMain.h"
 
 const byte ROWS = 4; // four rows
-const byte COLS = 4; // three columns
+const byte COLS = 4; // four columns
+
 char keys[ROWS][COLS] = {
-    {'1', '2', '3', 'A'},
-    {'4', '5', '6', 'B'},
-    {'7', '8', '9', 'C'},
-    {'*', '0', '#', 'D'}};
-byte colPins[COLS] = {17, 16, 15, 14};
-byte rowPins[ROWS] = {6, 5, 2, 1};
+    {'D', '#', '0', '*'},
+    {'C', '9', '8', '7'},
+    {'B', '6', '5', '4'},
+    {'A', '3', '2', '1'}};
+
+// PIN SUDAH DITUKAR: rowPins sekarang pakai pin yang tadinya colPins
+byte rowPins[ROWS] = {17, 16, 15, 14}; // baris terhubung ke pin 17,16,15,14
+byte colPins[COLS] = {6, 5, 2, 1};     // kolom terhubung ke pin 6,5,2,1
 
 Keypad kpd = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 
@@ -87,6 +91,15 @@ void handleKeypad()
                     setupWifi();
 
                 }
+                else if (inputPin == "##04##")
+                {
+                    playResetTone(200);
+                    Serial.println("Force OTA calling");
+                    delay(500);
+                    enterOtaMode();
+                    setupWifi();
+
+                }
                 else
                 {
                     playErrorTone();
@@ -102,7 +115,21 @@ void KeypadTask(void *pvParameters)
 {
     for (;;)
     {
+        if (isOtaMode)
+        {
+            vTaskDelay(1000 / portTICK_PERIOD_MS);
+            continue;
+        }
+
+        if (doorTimerActive && millis() - doorTimerStart >= doorTimerDuration)
+        {
+            ActivateDoor(false);
+            Serial.println("Door Closed");
+            doorTimerActive = false;
+        }
+
         handleKeypad();
+
         vTaskDelay(100 / portTICK_PERIOD_MS);
     }
 }

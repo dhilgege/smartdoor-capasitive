@@ -1,6 +1,6 @@
 #ifndef GLOBAL_VAR
 #define GLOBAL_VAR
-#include <Arduino.h> 
+#include <Arduino.h>
 
 // extern const int RXp2;
 // extern const int TXp2;
@@ -48,5 +48,8 @@ extern String date;
 extern unsigned long doorTimerStart;
 extern int doorTimerDuration;
 extern bool doorTimerActive;
+
+extern volatile bool isOtaMode;
+
 
 #endif

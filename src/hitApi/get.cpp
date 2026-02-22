@@ -3,6 +3,8 @@
 #include <config/apidata.h>
 #include "hitApi.h"
 #include "hardware.h"
+#include "config/config.h"
+#include "otaHandleMain.h"
 
 extern String AuthToken;
 extern String macAddress;
@@ -10,7 +12,7 @@ extern String status_device;
 extern int rfidCount;
 extern String rfids[];
 extern String StoredDoorPin;
-extern int detectPin;
+// extern int detectPin;
 
 void getStatusAndPinDevice()
 {
@@ -201,18 +203,71 @@ void getStatusTask(void *pvParameters)
 {
     for (;;)
     {
+        if (isOtaMode)
+        {
+            vTaskDelay(1000 / portTICK_PERIOD_MS);
+            continue;
+        }
+
         if (WiFi.status() == WL_CONNECTED)
         {
             getStatusAndPinDevice();
-            delay(1000);
         }
         else
         {
             Serial.println("Wifi terputus, gagal ambil status");
         }
+
+        if (status_device == "3")
+        {
+            enterOtaMode();
+        }
+
+        if (status_device == "0" && !doorTimerActive)
+        {
+            ActivateDoorTimer(3000);
+            Serial.println("Door open by API (timer)");
+            status_device = "-1";
+        }
+
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 }
+// void getFirmware()
+// {
+//     String response;
+//     if (WiFi.status() == WL_CONNECTED)
+//     {
+//         if (AuthToken)
+//         {
+//             HTTPClient http;
+//             String url = String(ServerName) + String(aaa) + "/" + macAddress;
+//             Serial.println("URL: " + url); // Cetak URL untuk debugging
+
+//             http.begin(url);                                        // mulai get
+//             http.addHeader("Authorization", "Bearer " + AuthToken); // kalau mau ada header
+
+//             int httpCode = http.GET(); // ambil respon kode> 200,500,404 dll
+
+//             if (httpCode == HTTP_CODE_OK) // kalau kode ok atau di range 200 an
+//             {
+//                 //======================================================
+//                 //eksekusi update disini aja
+//                 //======================================================
+//             }
+//             else if (httpCode == 302)
+//             { // kasi kondisi khusus
+//                 loginDevice(macAddress);
+//             }
+//             else
+//             {
+//                 Serial.print("Error Code: ");
+//                 Serial.println(httpCode);
+//             }
+//             http.end();
+//         }
+//     }
+// }
 
 void GET()
 {

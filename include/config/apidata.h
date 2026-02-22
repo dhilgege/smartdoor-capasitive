@@ -10,5 +10,6 @@ extern const char *ApiNewPin;
 extern const char *ApiUpdateStatusDevice;
 extern const char *ApiSendHistory;
 extern const char *ApiStatusAndPinDevice;
+extern const char *ApiFirmwareUpdate;
 
 #endif

@@ -31,9 +31,11 @@
 #include "handleSerialInput.h"
 #include "multitask/keypad_task.h"
 #include "multitask/api_task.h"
+#include "updateFirmware.h"
 
 void midnightTask();
 void getOneTime();
+void enterOtaMode();
 
 TaskHandle_t WiFiTaskHandle;
 TaskHandle_t getStatusTaskHandle;
@@ -49,8 +51,6 @@ void setup()
     Serial.begin(115200);
     ActivateDoor(false);
     getOneTimeDone = false;
-
-    // setupWifi();
 
     // Mulai task untuk memeriksa koneksi WiFi secara otomatis
     xTaskCreatePinnedToCore(
@@ -108,21 +108,10 @@ void setup()
 
 void loop()
 {
-    if (doorTimerActive && millis() - doorTimerStart >= doorTimerDuration)
-    {
-        ActivateDoor(false); // Matikan pintu setelah waktu habis
-        Serial.println("Door Closed");
-        doorTimerActive = false;
-    }
-    if (status_device == "0" && !doorTimerActive)
-    {
-        ActivateDoorTimer(3000); // buka 3 detik by API
-        Serial.println("Door open by API (timer)");
-        status_device = "-1"; // supaya gak terus-terusan aktif
-    }
+
+    if (isOtaMode) { delay(1000); return;} // pengecekan OTA harus diatas loop main(prioritas tertinggi)
 
     getOneTime();
-    // handleKeypad(); // harusnya dihapus
     handleSerialInput();
     printLocalTime(); // it will take some time to sync time :)
     midnightTask();
@@ -177,37 +166,27 @@ void getOneTime()
     }
 }
 
-// void midnightTask()
-// {
-//     // Dapatkan waktu lokal
-//     struct tm timeinfo;
-//     if (!getLocalTime(&timeinfo))
-//     {
-//         Serial.println("Waktu lokal belum tersedia");
-//         return;
-//     }
+void enterOtaMode()
+{
+    if (isOtaMode){
+        Serial.println("===== loop if is ota mode =====");
+        return;
+    }
 
-//     // Cek apakah hari telah berganti dan sudah masuk jam 00:00
-//     if (timeinfo.tm_hour == 13 && timeinfo.tm_min == 26)
-//     {
-//         // Cek apakah pengambilan data sudah dilakukan hari ini
-//         if (lastUpdateDay != timeinfo.tm_mday && !updateInProgress)
-//         {
-//             updateInProgress = true; // Tandai bahwa proses update sedang berlangsung
-//             Serial.println("Memulai pengambilan data RFID dan PIN baru...");
+    Serial.println("===== ENTER OTA MODE =====");
 
-//             // Ulangi pengambilan data hingga berhasil
-//             while (!getAllRfid() || !getNewPin())
-//             {
-//                 Serial.println("Pengambilan data gagal, mencoba ulang...");
-//                 delay(5000); // Tunggu sebelum mencoba lagi
-//             }
+    isOtaMode = true;
 
-//             // Jika berhasil, simpan hari terakhir update
-//             lastUpdateDay = timeinfo.tm_mday;
-//             Serial.println("Pengambilan data berhasil!");
+    ActivateDoor(false);
 
-//             updateInProgress = false; // Reset status proses update
-//         }
-//     }
-// }
+    // suspend task lain (opsional karena sudah ada flag guard)
+    // if (KeypadTaskHandle != NULL)
+    //     vTaskSuspend(KeypadTaskHandle);
+
+    // if (getStatusTaskHandle != NULL)
+    //     vTaskSuspend(getStatusTaskHandle);
+
+    delay(1500);
+
+    updateFirmware();
+}

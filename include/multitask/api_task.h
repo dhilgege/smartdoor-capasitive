@@ -4,12 +4,15 @@
 
 // void getStatusAndPinDevice();
 void getStatusTask(void *pvParameters);
+void versionTask(void *pvParameters);
 
 void loginDevice(String macAddress);
 
 bool getAllRfid();
 bool getNewPin();
-
 void detectPinSend();
+void sendDeviceVersion();
+
+
 
 #endif

@@ -1,0 +1,203 @@
+#include <Arduino.h>
+
+extern int LED_Red;
+extern int LED_Green;
+extern int LED_Yellow;
+extern int DoorPin;
+extern int resetpin;
+extern int detectPin;
+extern int BUZZER_PIN;
+extern int EXT_LED_RED;
+extern int EXT_LED_GREEN;
+extern int EXT_LED_BLUE;
+
+/*
+=====================================================
+    CONFIG RELAY
+    true  = relay aktif LOW  (umum di modul relay)
+    false = relay aktif HIGH
+=====================================================
+*/
+#define RELAY_ACTIVE_LOW true
+
+#if RELAY_ACTIVE_LOW
+#define DOOR_ON LOW
+#define DOOR_OFF HIGH
+#else
+#define DOOR_ON HIGH
+#define DOOR_OFF LOW
+#endif
+
+// ===== DOOR TIMER STATE =====
+static bool doorOpened = false;
+static unsigned long doorStartTime = 0;
+static unsigned long doorOpenDuration = 0;
+
+// =====================================================
+// SETUP PIN
+// =====================================================
+void pinSetup()
+{
+    pinMode(LED_Red, OUTPUT);
+    pinMode(LED_Green, OUTPUT);
+    pinMode(LED_Yellow, OUTPUT);
+
+    pinMode(EXT_LED_RED, OUTPUT);
+    pinMode(EXT_LED_GREEN, OUTPUT);
+    pinMode(EXT_LED_BLUE, OUTPUT);
+
+    pinMode(DoorPin, OUTPUT);
+    digitalWrite(DoorPin, DOOR_OFF); // pastikan awal tertutup
+
+    pinMode(resetpin, INPUT_PULLUP);
+    pinMode(detectPin, INPUT_PULLUP);
+
+    digitalWrite(EXT_LED_RED, HIGH);
+}
+
+// =====================================================
+// BLINK LED NON BLOCKING
+// =====================================================
+void blinkLedRed(bool state)
+{
+    static unsigned long previousMillis = 0;
+    const unsigned long interval = 500;
+
+    if (state)
+    {
+        if (millis() - previousMillis >= interval)
+        {
+            previousMillis = millis();
+            digitalWrite(LED_Red, !digitalRead(LED_Red));
+        }
+    }
+    else
+    {
+        digitalWrite(LED_Red, LOW);
+    }
+}
+
+// =====================================================
+// MANUAL CONTROL DOOR
+// =====================================================
+void ActivateDoor(bool state)
+{
+    if (state)
+    {
+        digitalWrite(DoorPin, DOOR_ON);
+        doorOpened = true;
+    }
+    else
+    {
+        digitalWrite(DoorPin, DOOR_OFF);
+        doorOpened = false;
+    }
+}
+
+// =====================================================
+// TRIGGER DOOR TIMER (PANGGIL SEKALI SAAT VALID)
+// =====================================================
+void ActivateDoorTimer(unsigned long duration)
+{
+    // kalau lagi kebuka jangan retrigger
+    if (doorOpened)
+        return;
+
+    doorStartTime = millis();
+    doorOpenDuration = duration;
+    doorOpened = true;
+
+    digitalWrite(DoorPin, DOOR_ON);
+
+    Serial.print("Door opened for ");
+    Serial.print(duration);
+    Serial.println(" ms");
+}
+
+// =====================================================
+// WAJIB DIPANGGIL TERUS DI LOOP
+// =====================================================
+void HandleDoorTimer()
+{
+    if (!doorOpened)
+        return;
+
+    if (millis() - doorStartTime >= doorOpenDuration)
+    {
+        digitalWrite(DoorPin, DOOR_OFF);
+        doorOpened = false;
+        Serial.println("Door closed");
+    }
+}
+
+// =====================================================
+// BUZZER
+// =====================================================
+void playKeypadTone()
+{
+    tone(BUZZER_PIN, 1000, 100);
+}
+
+void playResetTone(int time)
+{
+    tone(BUZZER_PIN, 3000, time);
+}
+
+void playSuccessTone()
+{
+    tone(BUZZER_PIN, 2000, 300);
+    delay(300);
+    tone(BUZZER_PIN, 2500, 300);
+    delay(300);
+}
+
+void playErrorTone()
+{
+    tone(BUZZER_PIN, 500, 500);
+    delay(500);
+}
+
+void playDeleteTone()
+{
+    tone(BUZZER_PIN, 400, 500);
+    delay(500);
+}
+
+void playDownloadTone()
+{
+    tone(BUZZER_PIN, 800, 100);
+    delay(100);
+}
+
+void playChangePWDTone()
+{
+    tone(BUZZER_PIN, 1000, 1000);
+    delay(1000);
+    tone(BUZZER_PIN, 1000, 200);
+    delay(200);
+    tone(BUZZER_PIN, 1000, 200);
+    delay(200);
+}
+
+// =====================================================
+// LED CONTROL
+// =====================================================
+void TurnOnLed(String state)
+{
+    if (state == "RED")
+        digitalWrite(EXT_LED_RED, HIGH);
+    else if (state == "GREEN")
+        digitalWrite(EXT_LED_GREEN, HIGH);
+    else if (state == "BLUE")
+        digitalWrite(EXT_LED_BLUE, HIGH);
+}
+
+void TurnOFFLed(String state)
+{
+    if (state == "RED")
+        digitalWrite(EXT_LED_RED, LOW);
+    else if (state == "GREEN")
+        digitalWrite(EXT_LED_GREEN, LOW);
+    else if (state == "BLUE")
+        digitalWrite(EXT_LED_BLUE, LOW);
+}

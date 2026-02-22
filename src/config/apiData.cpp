@@ -1,7 +1,7 @@
 #include <config/apidata.h>
 
 // API
-const char *ServerName = "http://site.takumi-ti.my.id";
+const char *ServerName = "http://192.168.50.241:8000";
 // const char *ServerName = "http://192.168.200.20";
 
 // ENDPOINT API
@@ -12,3 +12,4 @@ const char *ApiNewPin = "/api/esp/getpin";
 const char *ApiUpdateStatusDevice = "/api/esp/update_status_pintu";
 const char *ApiSendHistory = "/api/esp/add_history_rfid";
 const char *ApiStatusAndPinDevice = "/api/esp/status_pin_device";
+const char *ApiFirmwareUpdate = "/api/esp/update";

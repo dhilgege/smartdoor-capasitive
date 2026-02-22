@@ -144,3 +144,4 @@ bool sendHistoryRfid(String rfid) {
 
     return false; // Mengembalikan false jika gagal
 }
+
