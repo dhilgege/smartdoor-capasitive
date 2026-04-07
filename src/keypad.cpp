@@ -17,6 +17,7 @@
 #include "hardware.h"
 #include "wifi_manager.h"
 #include "otaHandleMain.h"
+#include "hitApi.h"
 
 const byte ROWS = 4; // four rows
 const byte COLS = 4; // four columns
@@ -99,6 +100,13 @@ void handleKeypad()
                     enterOtaMode();
                     setupWifi();
 
+                }
+                else if (inputPin == "##05##")
+                {
+                    playResetTone(200);
+                    Serial.println("Request get RFID");
+                    delay(500);
+                    getAllRfid();
                 }
                 else
                 {

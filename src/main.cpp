@@ -85,6 +85,7 @@ void setup()
 
     pinSetup();
     rfid125Setup();
+    setupWifi();
     // setupRfid();
     // checkConnection();
 

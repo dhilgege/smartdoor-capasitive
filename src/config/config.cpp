@@ -42,7 +42,7 @@ String status_device = "1"; // Status perangkat default
 String rfids[1000];
 int rfidCount = 0;
 
-const char *ssidwifimanager = "Device IoT Ruang Recuitment Belakang";
+const char *ssidwifimanager = "Device IoT Ruang Aula Lt4";
 const char *passwordwifimanager = "11111111";
 const char *customHostname = ssidwifimanager;
 
