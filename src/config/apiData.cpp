@@ -1,7 +1,7 @@
 #include <config/apidata.h>
 
 // API
-const char *ServerName = "http://192.168.180.35:8000";
+const char *ServerName = "http://192.168.200.20";
 
 // ENDPOINT API
 const char *ApiAllRfid = "/api/esp/rfid";

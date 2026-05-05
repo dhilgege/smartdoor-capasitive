@@ -23,14 +23,14 @@ const byte ROWS = 4; // four rows
 const byte COLS = 4; // four columns
 
 char keys[ROWS][COLS] = {
-    {'D', '#', '0', '*'},
-    {'C', '9', '8', '7'},
-    {'B', '6', '5', '4'},
-    {'A', '3', '2', '1'}};
+    {'1', '2', '3', 'A'},
+    {'4', '5', '6', 'B'},
+    {'7', '8', '9', 'C'},
+    {'*', '0', '#', 'D'}};
 
 // PIN SUDAH DITUKAR: rowPins sekarang pakai pin yang tadinya colPins
-byte rowPins[ROWS] = {17, 16, 15, 14}; // baris terhubung ke pin 17,16,15,14
-byte colPins[COLS] = {6, 5, 2, 1};     // kolom terhubung ke pin 6,5,2,1
+byte colPins[COLS] = {17, 16, 15, 14}; // baris terhubung ke pin 17,16,15,14
+byte rowPins[ROWS] = {6, 5, 2, 1};     // kolom terhubung ke pin 6,5,2,1
 
 Keypad kpd = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 
