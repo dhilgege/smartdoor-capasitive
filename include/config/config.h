@@ -6,6 +6,20 @@
 #include <config/version.h>
 
 // =============================================================================
+// 0. PILIHAN MODUL RFID (RFID MODULE SELECTOR)
+// Pilih salah satu modul RFID yang digunakan pada board:
+//   RFID_MODULE_RDM6300    : Modul 125 kHz RDM6300 (Default)
+//   RFID_MODULE_GWIOT7941E : Modul 125 kHz GWIOT-7941E
+//   RFID_MODULE_MFRC522    : Modul 13.56 MHz MFRC522 (RC522 SPI)
+// =============================================================================
+#define RFID_MODULE_RDM6300     1
+#define RFID_MODULE_GWIOT7941E  2
+#define RFID_MODULE_MFRC522     3
+
+// Ubah baris ini untuk memilih modul yang aktif pada hardware:
+#define ACTIVE_RFID_MODULE      RFID_MODULE_RDM6300
+
+// =============================================================================
 // 1. PENGATURAN WIFI & ACCESS POINT (WiFiManager)
 // =============================================================================
 extern const char *ssidwifimanager;       // SSID Hotspot konfigurasi WiFi

@@ -21,8 +21,7 @@
 
 // #include "multitask/wifi_task.h"
 #include "wifi_manager.h"
-// #include "rfid.h"
-#include "rfid125.h"
+#include "rfid.h"
 #include "hardware.h"
 #include "config/config.h"
 #include "hitApi.h"
@@ -84,9 +83,8 @@ void setup()
     );
 
     pinSetup();
-    rfid125Setup();
+    rfidSetup();
     setupWifi();
-    // setupRfid();
     // checkConnection();
 
     // Dapatkan MAC address ESP32
@@ -116,7 +114,7 @@ void loop()
     handleSerialInput();
     printLocalTime(); // it will take some time to sync time :)
     midnightTask();
-    readRfid125();
+    readRfid();
 }
 
 int lastUpdateDay = -1;        // Hari terakhir update
