@@ -1,18 +1,8 @@
 #include <Arduino.h>
 #include "time.h"     // library time
 #include "esp_sntp.h" // library SNTP ESP32
-
-extern String date;
-
-
-// real time clock
-const char *ntpServer1 = "pool.ntp.org";
-const char *ntpServer2 = "time.nist.gov";
-const long gmtOffset_sec = 25200;
-const int daylightOffset_sec = 0;
-
-// Time zone rule (optional)
-const char *time_zone = "CET-1CEST,M3.5.0,M10.5.0/3";
+#include "timeServer.h"
+#include "config/config.h"
 
 // Fungsi callback
 void timeavailable(struct timeval *t);

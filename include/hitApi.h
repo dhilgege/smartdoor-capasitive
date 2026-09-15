@@ -1,6 +1,6 @@
-// api_data.h
-#ifndef HIT_API
-#define HIT_API
+// hitApi.h
+#ifndef HIT_API_H
+#define HIT_API_H
 
 void getStatusAndPinDevice();
 bool getAllRfid();

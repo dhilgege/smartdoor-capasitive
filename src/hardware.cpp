@@ -1,20 +1,6 @@
 #include <Arduino.h>
-
-
-
-extern int LED_Red;
-extern int LED_Green;
-extern int LED_Yellow;
-extern int DoorPin;
-extern int resetpin;
-extern int detectPin;
-extern int BUZZER_PIN;
-extern int EXT_LED_RED;
-extern int EXT_LED_GREEN;
-extern int EXT_LED_BLUE;
-extern unsigned long doorTimerStart;
-extern int doorTimerDuration;
-extern bool doorTimerActive;
+#include "config/config.h"
+#include "hardware.h"
 
 
 

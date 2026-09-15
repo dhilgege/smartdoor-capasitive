@@ -1,7 +1,7 @@
 //UNUSED FILE, WORKING BUT NOT IN USE
 
-#ifndef RFID
-#define RFID
+#ifndef RFID_H
+#define RFID_H
 
 void cekRfid();
 void setupRfid();

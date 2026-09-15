@@ -3,15 +3,9 @@
  */
 
 #include <rdm6300.h>
+#include "config/config.h"
 #include "hardware.h"
 #include <hitApi.h>
-
-#define RDM6300_RX_PIN 41
-#define READ_LED_PIN 38
-
-extern int rfidCount;
-extern String rfids[];
-extern bool updateHistoryInProgress;
 
 String uidStr = "";
 
@@ -19,12 +13,12 @@ Rdm6300 rdm6300;
 
 void rfid125Setup()
 {
-    pinMode(READ_LED_PIN, OUTPUT);
-    digitalWrite(READ_LED_PIN, LOW);
+    pinMode(LED_Red, OUTPUT);
+    digitalWrite(LED_Red, LOW);
 
     Serial.println("Initializing RDM6300...");
 
-    rdm6300.begin(RDM6300_RX_PIN);
+    rdm6300.begin(RFID125_RX_PIN);
 
     Serial.println("Place RFID tag near the RDM6300...");
 }

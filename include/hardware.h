@@ -1,5 +1,5 @@
-#ifndef name
-#define name
+#ifndef HARDWARE_H
+#define HARDWARE_H
 
 void pinSetup();
 

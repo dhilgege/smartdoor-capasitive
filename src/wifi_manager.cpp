@@ -2,10 +2,7 @@
 #include <WiFiManager.h>  // https://github.com/tzapu/WiFiManager
 #include "wifi_manager.h"
 #include "hardware.h"
-
-extern char *customHostname;
-extern char *ssidwifimanager;
-extern char *passwordwifimanager;
+#include "config/config.h"
 
 WiFiManager wm;       // Instance WiFiManager
 bool portalActive = false; // Status apakah portal WiFi aktif

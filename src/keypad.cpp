@@ -19,26 +19,18 @@
 #include "otaHandleMain.h"
 #include "hitApi.h"
 
-const byte ROWS = 4; // four rows
-const byte COLS = 4; // four columns
-
-char keys[ROWS][COLS] = {
+char keys[KEYPAD_ROWS][KEYPAD_COLS] = {
     {'1', '2', '3', 'A'},
     {'4', '5', '6', 'B'},
     {'7', '8', '9', 'C'},
     {'*', '0', '#', 'D'}};
 
-// PIN SUDAH DITUKAR: rowPins sekarang pakai pin yang tadinya colPins
-byte colPins[COLS] = {17, 16, 15, 14}; // baris terhubung ke pin 17,16,15,14
-byte rowPins[ROWS] = {6, 5, 2, 1};     // kolom terhubung ke pin 6,5,2,1
-
-Keypad kpd = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
+Keypad kpd = Keypad(makeKeymap(keys), KEYPAD_ROW_PINS, KEYPAD_COL_PINS, KEYPAD_ROWS, KEYPAD_COLS);
 
 unsigned long loopCount;
 unsigned long startTime;
 String msg;
 
-extern String StoredDoorPin;
 String inputPin = "";
 
 void handleKeypad()

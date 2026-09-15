@@ -1,55 +1,87 @@
-#ifndef GLOBAL_VAR
-#define GLOBAL_VAR
+#ifndef CONFIG_H
+#define CONFIG_H
+
 #include <Arduino.h>
+#include <config/apidata.h>
+#include <config/version.h>
 
-// extern const int RXp2;
-// extern const int TXp2;
+// =============================================================================
+// 1. PENGATURAN WIFI & ACCESS POINT (WiFiManager)
+// =============================================================================
+extern const char *ssidwifimanager;       // SSID Hotspot konfigurasi WiFi
+extern const char *passwordwifimanager;   // Password Hotspot konfigurasi WiFi
+extern const char *customHostname;        // Hostname perangkat ESP32
 
-// led bawaan
-extern const int LED_Red;
-extern const int LED_Green;
-extern const int LED_Yellow;
+// =============================================================================
+// 2. PEMETAAN PIN GPIO (HARDWARE PIN MAPPING)
+// Catatan: Nilai pin tetap sama persis untuk menjaga kompatibilitas hardware
+// =============================================================================
 
+// --- LED Internal (Bawaan ESP32) ---
+extern const int LED_Red;                 // GPIO 38: LED Merah
+extern const int LED_Green;               // GPIO 47: LED Hijau
+extern const int LED_Yellow;              // GPIO 48: LED Kuning
 
-// led external
-extern const int EXT_LED_RED;
-extern const int EXT_LED_GREEN;
-extern const int EXT_LED_BLUE;
+// --- LED Eksternal (RGB / Status) ---
+extern const int EXT_LED_RED;             // GPIO 7
+extern const int EXT_LED_GREEN;           // GPIO 17
+extern const int EXT_LED_BLUE;            // GPIO 17
 
-//unused rfid 16mhz
-extern const int SS_PIN;
-extern const int RST_PIN;
+// --- Relay / Solenoid Door & Buzzer ---
+extern const int DoorPin;                 // GPIO 39: Relay Kunci Pintu
+extern const int BUZZER_PIN;              // GPIO 40: Buzzer Notifikasi Audio
 
-// etc
-extern const int DoorPin;
-extern const int BUZZER_PIN;
-extern const int detectPin;
-extern const int resetpin;
+// --- Sensor & Tombol Deteksi ---
+extern const int detectPin;               // GPIO 12: Sensor Deteksi Pintu (Input Pullup)
+extern const int resetpin;                // GPIO 200: Pin Reset Tambahan (Belum Digunakan)
 
-extern const int GWIOT_7941E_RX_PIN;
+// --- RFID 125 kHz (RDM6300 / GWIOT 7941E) ---
+extern const int GWIOT_7941E_RX_PIN;      // GPIO 41: UART RX RFID 125kHz
+extern const int RFID125_RX_PIN;          // GPIO 41: Alias untuk RDM6300 RX
 
+// --- RFID 13.56 MHz (MFRC522 RC522 - Cadangan) ---
+extern const int SS_PIN;                  // GPIO 112: SPI SS/CS (Tidak digunakan saat ini)
+extern const int RST_PIN;                 // GPIO 111: RST (Tidak digunakan saat ini)
 
-extern String AuthToken;
-extern String macAddress;
-extern String SSID;
-extern String status_device;
-extern int rfidCount;
-extern String rfids[];
+// --- Keypad 4x4 Matrix ---
+const byte KEYPAD_ROWS = 4;
+const byte KEYPAD_COLS = 4;
+extern byte KEYPAD_ROW_PINS[KEYPAD_ROWS]; // Baris: {6, 5, 2, 1}
+extern byte KEYPAD_COL_PINS[KEYPAD_COLS]; // Kolom: {17, 16, 15, 14}
 
-extern const char *ssidwifimanager;
-extern const char *passwordwifimanager;
-extern const char *customHostname;
+// =============================================================================
+// 3. PARAMETER WAKTU & TIMING DEFAULT
+// =============================================================================
+const int DEFAULT_DOOR_TIMER_MS = 3000;   // Durasi buka pintu otomatis (ms)
 
+// --- Konfigurasi Real-Time Clock / NTP ---
+extern const char *ntpServer1;
+extern const char *ntpServer2;
+extern const long gmtOffset_sec;
+extern const int daylightOffset_sec;
+extern const char *time_zone;
 
-extern String StoredDoorPin;
+// =============================================================================
+// 4. VARIABEL RUNTIME GLOBAL (SYSTEM STATE)
+// =============================================================================
+extern String AuthToken;                  // Token otentikasi API
+extern String macAddress;                 // MAC Address perangkat
+extern String SSID;                       // SSID WiFi yang terhubung
+extern String status_device;              // Status perangkat dari API (default: "1")
+extern String StoredDoorPin;              // PIN akses pintu (default: "111111")
+extern String date;                       // String tanggal / jam sinkronisasi
 
-extern String date;
+// Status sinkronisasi RFID
+extern String rfids[];                    // Cache UID RFID yang diizinkan
+extern int rfidCount;                     // Jumlah kartu RFID tersimpan
+extern bool updateHistoryInProgress;      // Flag status pengiriman riwayat ke server
 
-extern unsigned long doorTimerStart;
-extern int doorTimerDuration;
-extern bool doorTimerActive;
+// State Timer Pintu
+extern unsigned long doorTimerStart;      // Timestamp saat pintu terbuka
+extern int doorTimerDuration;             // Durasi timer pintu aktif
+extern bool doorTimerActive;              // Status apakah timer pintu sedang aktif
 
-extern volatile bool isOtaMode;
+// State Mode OTA
+extern volatile bool isOtaMode;           // Flag apakah perangkat sedang dalam mode OTA
 
-
-#endif
+#endif // CONFIG_H
