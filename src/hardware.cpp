@@ -13,8 +13,12 @@ void pinSetup(){
 
     //pin LED eksternal
     pinMode(EXT_LED_RED, OUTPUT);
+#if (ACTIVE_KEYPAD_TYPE != KEYPAD_TYPE_I2C_TOUCH_4X3)
+    // GPIO 17 digunakan sebagai IRQ keypad I2C saat mode capacitive touch aktif.
+    // Hindari override ke OUTPUT agar tidak mengganggu sinyal interrupt.
     pinMode(EXT_LED_GREEN, OUTPUT);
     pinMode(EXT_LED_BLUE, OUTPUT);
+#endif
 
             digitalWrite(EXT_LED_RED, HIGH);
 
@@ -22,6 +26,10 @@ void pinSetup(){
     digitalWrite(DoorPin, LOW);
     pinMode(resetpin, INPUT_PULLUP);  // pin Relay
     pinMode(detectPin, INPUT_PULLUP); // pin Relay
+
+    // Buzzer
+    pinMode(BUZZER_PIN, OUTPUT);
+    digitalWrite(BUZZER_PIN, LOW);
 }
 
 void blinkLedRed(bool state)
@@ -79,6 +87,28 @@ void ActivateDoorTimer(int duration) {
 void playKeypadTone()
 {
     tone(BUZZER_PIN, 1000, 100); // Nada 1000 Hz selama 100 ms
+}
+
+// Nada unik per tombol (tangga nada musik) — dari kode test keypad yang berhasil
+void playKeypadToneForKey(char key)
+{
+    uint16_t freq;
+    switch (key) {
+        case '1': freq = 262; break;  // C4
+        case '2': freq = 294; break;  // D4
+        case '3': freq = 330; break;  // E4
+        case '4': freq = 349; break;  // F4
+        case '5': freq = 392; break;  // G4
+        case '6': freq = 440; break;  // A4
+        case '7': freq = 494; break;  // B4
+        case '8': freq = 523; break;  // C5
+        case '9': freq = 587; break;  // D5
+        case '0': freq = 220; break;  // A3
+        case 'A': freq = 659; break;  // E5
+        case 'B': freq = 698; break;  // F5
+        default:  freq = 1000; break; // fallback
+    }
+    tone(BUZZER_PIN, freq, 100); // Nada 100 ms
 }
 
 void playResetTone(int time)

@@ -14,6 +14,7 @@ void TurnOFFLed(String state);
 
 // Buzzer
 void playKeypadTone();
+void playKeypadToneForKey(char key); // Nada unik per tombol (tangga nada musik)
 void playResetTone(int time);
 void playSuccessTone();
 void playDeleteTone();

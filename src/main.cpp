@@ -47,9 +47,16 @@ bool getOneTimeDone;
 
 void setup()
 {
-    Serial.begin(115200);
+    Serial.begin(9600);
+    pinSetup();   // HARUS di atas xTaskCreate agar BUZZER_PIN sudah siap
     ActivateDoor(false);
     getOneTimeDone = false;
+
+    // Test buzzer saat startup
+    tone(BUZZER_PIN, 1000, 150);
+    delay(200);
+    tone(BUZZER_PIN, 1500, 150);
+    delay(200);
 
     // Mulai task untuk memeriksa koneksi WiFi secara otomatis
     xTaskCreatePinnedToCore(
@@ -82,7 +89,6 @@ void setup()
         1 // Core 1
     );
 
-    pinSetup();
     rfidSetup();
     setupWifi();
     // checkConnection();

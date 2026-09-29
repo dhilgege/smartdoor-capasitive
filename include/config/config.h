@@ -6,7 +6,7 @@
 #include <config/version.h>
 
 // =============================================================================
-// 0. PILIHAN MODUL RFID (RFID MODULE SELECTOR)
+// 0a. PILIHAN MODUL RFID (RFID MODULE SELECTOR)
 // Pilih salah satu modul RFID yang digunakan pada board:
 //   RFID_MODULE_RDM6300    : Modul 125 kHz RDM6300 (Default)
 //   RFID_MODULE_GWIOT7941E : Modul 125 kHz GWIOT-7941E
@@ -18,6 +18,18 @@
 
 // Ubah baris ini untuk memilih modul yang aktif pada hardware:
 #define ACTIVE_RFID_MODULE      RFID_MODULE_RDM6300
+
+// =============================================================================
+// 0b. PILIHAN TIPE KEYPAD (KEYPAD TYPE SELECTOR)
+// Pilih salah satu tipe keypad yang digunakan pada board:
+//   KEYPAD_TYPE_MATRIX_4X4    : Keypad mekanik 4x4 matrix (Default)
+//   KEYPAD_TYPE_I2C_TOUCH_4X3 : Keypad capacitive touch I2C 4x3 (MPR121)
+// =============================================================================
+#define KEYPAD_TYPE_MATRIX_4X4     1
+#define KEYPAD_TYPE_I2C_TOUCH_4X3  2
+
+// Ubah baris ini untuk memilih tipe keypad yang aktif pada hardware:
+#define ACTIVE_KEYPAD_TYPE         KEYPAD_TYPE_I2C_TOUCH_4X3
 
 // =============================================================================
 // 1. PENGATURAN WIFI & ACCESS POINT (WiFiManager)
@@ -62,6 +74,13 @@ const byte KEYPAD_ROWS = 4;
 const byte KEYPAD_COLS = 4;
 extern byte KEYPAD_ROW_PINS[KEYPAD_ROWS]; // Baris: {6, 5, 2, 1}
 extern byte KEYPAD_COL_PINS[KEYPAD_COLS]; // Kolom: {17, 16, 15, 14}
+
+// --- Keypad Capacitive Touch I2C 4x3 (MPR121) ---
+extern const int KEYPAD_I2C_SDA_PIN;  // GPIO 8: SDA
+extern const int KEYPAD_I2C_SCL_PIN;  // GPIO 9: SCL
+extern const int KEYPAD_I2C_IRQ_PIN;  // GPIO 17: IRQ (Interrupt)
+#define KEYPAD_I2C_ADDR  0x5A         // Alamat I2C default MPR121
+extern char KEYPAD_I2C_TOUCH_KEYS[12]; // Pemetaan 12 elektroda ke karakter
 
 // =============================================================================
 // 3. PARAMETER WAKTU & TIMING DEFAULT

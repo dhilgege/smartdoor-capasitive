@@ -25,7 +25,7 @@ const int EXT_LED_BLUE  = 17; // SPI_MOSI
 
 // --- Relay / Solenoid Pintu & Buzzer ---
 const int DoorPin    = 39; // Pin kontrol relay pintu
-const int BUZZER_PIN = 40; // Pin buzzer nada audio
+const int BUZZER_PIN = 21; // Pin buzzer nada audio
 
 // --- Sensor & Tombol Deteksi ---
 const int detectPin = 12;  // Sensor deteksi pintu
@@ -43,6 +43,20 @@ const int RST_PIN = 111; // Unused
 // Urutan koneksi pin keypad matrix 4x4
 byte KEYPAD_ROW_PINS[KEYPAD_ROWS] = {6, 5, 2, 1};     // Row pins
 byte KEYPAD_COL_PINS[KEYPAD_COLS] = {17, 16, 15, 14}; // Column pins
+
+// --- Keypad Capacitive Touch I2C 4x3 (MPR121) ---
+// SDA = GPIO 8, SCL = GPIO 9, IRQ = GPIO 17
+const int KEYPAD_I2C_SDA_PIN = 8;
+const int KEYPAD_I2C_SCL_PIN = 9;
+const int KEYPAD_I2C_IRQ_PIN = 17;
+// Pemetaan 12 elektroda MPR121 (ELE0-ELE11) ke karakter keypad 4x3:
+// Baris 1: 1 2 3 | Baris 2: 4 5 6 | Baris 3: 7 8 9 | Baris 4: * 0 #
+char KEYPAD_I2C_TOUCH_KEYS[12] = {
+    '1', '2', '3',
+    '4', '5', '6',
+    '7', '8', '9',
+    '*', '0', '#'
+};
 
 // =============================================================================
 // 3. PARAMETER WAKTU & TIMING DEFAULT
