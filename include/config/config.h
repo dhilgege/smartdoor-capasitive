@@ -57,9 +57,20 @@ extern const int EXT_LED_BLUE;            // GPIO 17
 extern const int DoorPin;                 // GPIO 39: Relay Kunci Pintu
 extern const int BUZZER_PIN;              // GPIO 40: Buzzer Notifikasi Audio
 
+// --- Tombol Exit (Push On / NO) ---
+extern const int EXIT_BTN_PIN;            // GPIO 13: J3 pin 6 (SPI_MISO), kaki lain ke GND (J3 pin 7)
+
 // --- Sensor & Tombol Deteksi ---
 extern const int detectPin;               // GPIO 12: Sensor Deteksi Pintu (Input Pullup)
 extern const int resetpin;                // GPIO 200: Pin Reset Tambahan (Belum Digunakan)
+
+// --- W5500 Ethernet SPI ---
+extern const int W5500_MOSI;
+extern const int W5500_MISO;
+extern const int W5500_SCLK;
+extern const int W5500_CS;
+extern const int W5500_RST;
+extern const int W5500_INT;
 
 // --- RFID 125 kHz (RDM6300 / GWIOT 7941E) ---
 extern const int GWIOT_7941E_RX_PIN;      // GPIO 41: UART RX RFID 125kHz

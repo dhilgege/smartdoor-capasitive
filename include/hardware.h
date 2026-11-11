@@ -7,7 +7,14 @@ void pinSetup();
 void ActivateDoor(bool state);
 void ActivateDoorTimer(int time);
 
+// Tombol exit (push on) -> buka pintu
+void initExitButton();
+
 // LED
+extern bool isSystemError;
+void initErrorIndicator();
+void initNetworkIndicator();
+void setErrorState(bool state);
 void blinkLED(bool startBlinking);
 void TurnOnLed(String state);
 void TurnOFFLed(String state);

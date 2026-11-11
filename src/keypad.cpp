@@ -1,4 +1,4 @@
-﻿#include <Arduino.h>
+#include <Arduino.h>
 #include "config/config.h"
 #include "hardware.h"
 #include "wifi_manager.h"
@@ -330,3 +330,5 @@ void KeypadTask(void *pvParameters)
         vTaskDelay(50 / portTICK_PERIOD_MS); // 50ms polling (lebih responsif)
     }
 }
+
+

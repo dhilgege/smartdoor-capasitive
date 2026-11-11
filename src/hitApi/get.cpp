@@ -1,29 +1,45 @@
+#include <WiFi.h>
 #include "wifi_manager.h"
 #include <HTTPClient.h>
 #include "hitApi.h"
 #include "hardware.h"
 #include "config/config.h"
 #include "otaHandleMain.h"
+#include "ethernet_manager.h"
 
 
 void getStatusAndPinDevice()
 {
-    if (WiFi.status() == WL_CONNECTED)
+    if (WiFi.status() == WL_CONNECTED || isEthernetConnected())
     {
-        if (AuthToken)
+        if (AuthToken.length() > 0 && macAddress.length() > 0)
         {
             HTTPClient http;
             String url = String(ServerName) + String(ApiStatusAndPinDevice) + "/" + macAddress;
             Serial.println("URL: " + url);
 
             http.begin(url);
+            http.setTimeout(2500);
+            http.addHeader("Accept", "application/json");
+            http.addHeader("X-Requested-With", "XMLHttpRequest");
             http.addHeader("Authorization", "Bearer " + AuthToken);
+            http.addHeader("Connection", "close");
 
             int httpCode = http.GET();
 
             if (httpCode == HTTP_CODE_OK)
             {
                 String respon = http.getString();
+                respon.trim();
+
+                // Cegah parsing jika respon tidak sengaja mengembalikan halaman HTML
+                if (respon.startsWith("<") || respon.indexOf("<html") != -1)
+                {
+                    Serial.println("[API] Peringatan: Respon berformat HTML, bukan JSON.");
+                    http.end();
+                    return;
+                }
+
                 Serial.println("Respon: " + respon);
 
                 // Ambil pin_device
@@ -63,6 +79,22 @@ void getStatusAndPinDevice()
             {
                 Serial.print("Error Code: ");
                 Serial.println(httpCode);
+                String errResp = http.getString();
+                errResp.trim();
+                if (errResp.startsWith("<"))
+                {
+                    int titleStart = errResp.indexOf("<title>");
+                    int titleEnd = errResp.indexOf("</title>");
+                    if (titleStart != -1 && titleEnd != -1) {
+                        Serial.println("[HTML Error] " + errResp.substring(titleStart + 7, titleEnd));
+                    } else {
+                        Serial.println("[HTML Error] Server mengembalikan halaman HTML.");
+                    }
+                }
+                else if (errResp.length() > 0)
+                {
+                    Serial.println("Respon: " + errResp);
+                }
             }
 
             http.end();
@@ -73,19 +105,33 @@ void getStatusAndPinDevice()
 
 bool getAllRfid()
 {
-    if (WiFi.status() == WL_CONNECTED)
+    if (WiFi.status() == WL_CONNECTED || isEthernetConnected())
     {
         HTTPClient http;
         String url = String(ServerName) + String(ApiAllRfid) + "/" + macAddress;
         playDownloadTone();
         http.begin(url);
-        Serial.println("sending to " + url);
+        http.setTimeout(5000);
+        http.addHeader("Accept", "application/json");
+        http.addHeader("X-Requested-With", "XMLHttpRequest");
         http.addHeader("Authorization", "Bearer " + AuthToken);
+        http.addHeader("Connection", "close");
+        Serial.println("sending to " + url);
 
         int httpResponseCode = http.GET();
         if (httpResponseCode == HTTP_CODE_OK)
         {
             String response = http.getString();
+            response.trim();
+
+            if (response.startsWith("<") || !response.startsWith("["))
+            {
+                Serial.println("[API] Respon RFID bukan array JSON valid!");
+                playErrorTone();
+                http.end();
+                return false;
+            }
+
             Serial.println("RFID Response: " + response);
 
             response.replace("[", "");  // Hapus '['
@@ -109,21 +155,39 @@ bool getAllRfid()
             Serial.print("Jumlah RFID yang di-download: ");
             Serial.println(rfidCount);
             playSuccessTone();
+            http.end();
             return true;
         }
         else if (httpResponseCode == 302)
         {
             loginDevice(macAddress);
+            http.end();
             return false;
         }
         else
         {
             Serial.print("Error Code: ");
             Serial.println(httpResponseCode);
+            String errResp = http.getString();
+            errResp.trim();
+            if (errResp.startsWith("<"))
+            {
+                int titleStart = errResp.indexOf("<title>");
+                int titleEnd = errResp.indexOf("</title>");
+                if (titleStart != -1 && titleEnd != -1) {
+                    Serial.println("[HTML Error] " + errResp.substring(titleStart + 7, titleEnd));
+                } else {
+                    Serial.println("[HTML Error] Server mengembalikan halaman HTML.");
+                }
+            }
+            else if (errResp.length() > 0)
+            {
+                Serial.println("Respon: " + errResp);
+            }
             playErrorTone();
+            http.end();
             return false;
         }
-        http.end();
     }
     else
     {
@@ -131,64 +195,14 @@ bool getAllRfid()
         // checkConnection();
         return false;
     }
+
+    return false; // Jaga-jaga: semua jalur eksekusi pasti mengembalikan nilai
 }
 
 bool getNewPin()
 {
-    // lanngsung return true karena pin device diambil dari getStatusAndPinDevice
+    // langsung return true karena pin device diambil dari getStatusAndPinDevice
     return true;
-
-    // if (WiFi.status() == WL_CONNECTED)
-    // {
-    //     HTTPClient http;
-    //     String url = String(ServerName) + String(ApiNewPin) + "/" + macAddress;
-    //     Serial.println("URL: " + url); // Debugging
-    //     playDownloadTone();
-
-    //     http.begin(url);
-    //     http.addHeader("Authorization", "Bearer " + AuthToken);
-
-    //     int httpCode = http.GET();
-    //     if (httpCode == HTTP_CODE_OK)
-    //     {
-    //         String respon = http.getString();
-    //         respon.replace("[", "");  // Hapus '['
-    //         respon.replace("]", "");  // Hapus ']'
-    //         respon.replace("\"", ""); // Hapus '"'
-
-    //         if (respon.length() != 6)
-    //         {
-    //             respon == "717477";
-    //         }
-    //         else
-    //         {
-    //             Serial.println("Pin yang diambil: " + respon);
-    //             StoredDoorPin = respon; // Simpan PIN yang diambil
-    //             Serial.println("Pin stored: " + StoredDoorPin);
-    //         };
-    //         playSuccessTone();
-    //         return true;
-    //     }
-    //     else if (httpCode == 302)
-    //     {
-    //         loginDevice(macAddress);
-    //         return false;
-    //     }
-    //     else
-    //     {
-    //         Serial.print("Error Code: ");
-    //         Serial.println(httpCode);
-    //         playErrorTone();
-    //         return false;
-    //     }
-    //     http.end();
-    // }
-    // else
-    // {
-    //     Serial.println("GetNewPin: WiFi Disconnected");
-    //     // checkConnection();
-    //     return false;
-    // }
 }
 
 void getStatusTask(void *pvParameters)
@@ -201,13 +215,16 @@ void getStatusTask(void *pvParameters)
             continue;
         }
 
-        if (WiFi.status() == WL_CONNECTED)
+        if (WiFi.status() == WL_CONNECTED || isEthernetConnected())
         {
-            getStatusAndPinDevice();
+            if (AuthToken.length() > 0 && macAddress.length() > 0)
+            {
+                getStatusAndPinDevice();
+            }
         }
         else
         {
-            Serial.println("Wifi terputus, gagal ambil status");
+            Serial.println("Jaringan terputus, gagal ambil status");
         }
 
         if (status_device == "3")
@@ -222,71 +239,37 @@ void getStatusTask(void *pvParameters)
             status_device = "-1";
         }
 
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        vTaskDelay(2000 / portTICK_PERIOD_MS); // Polling 2s untuk mencegah kehabisan TCP socket PCB
     }
 }
-// void getFirmware()
-// {
-//     String response;
-//     if (WiFi.status() == WL_CONNECTED)
-//     {
-//         if (AuthToken)
-//         {
-//             HTTPClient http;
-//             String url = String(ServerName) + String(aaa) + "/" + macAddress;
-//             Serial.println("URL: " + url); // Cetak URL untuk debugging
-
-//             http.begin(url);                                        // mulai get
-//             http.addHeader("Authorization", "Bearer " + AuthToken); // kalau mau ada header
-
-//             int httpCode = http.GET(); // ambil respon kode> 200,500,404 dll
-
-//             if (httpCode == HTTP_CODE_OK) // kalau kode ok atau di range 200 an
-//             {
-//                 //======================================================
-//                 //eksekusi update disini aja
-//                 //======================================================
-//             }
-//             else if (httpCode == 302)
-//             { // kasi kondisi khusus
-//                 loginDevice(macAddress);
-//             }
-//             else
-//             {
-//                 Serial.print("Error Code: ");
-//                 Serial.println(httpCode);
-//             }
-//             http.end();
-//         }
-//     }
-// }
 
 void GET()
 {
     String response;
-    if (WiFi.status() == WL_CONNECTED)
+    if (WiFi.status() == WL_CONNECTED || isEthernetConnected())
     {
-        if (AuthToken)
+        if (AuthToken.length() > 0)
         {
             HTTPClient http;
             String url = "http://localhost:8000/api/getdata" + macAddress;
             Serial.println("URL: " + url); // Cetak URL untuk debugging
 
-            http.begin(url);                                        // mulai get
-            http.addHeader("Authorization", "Bearer " + AuthToken); // kalau mau ada header
+            http.begin(url);
+            http.addHeader("Accept", "application/json");
+            http.addHeader("X-Requested-With", "XMLHttpRequest");
+            http.addHeader("Authorization", "Bearer " + AuthToken);
+            http.addHeader("Connection", "close");
 
-            int httpCode = http.GET(); // ambil respon kode> 200,500,404 dll
+            int httpCode = http.GET(); // ambil respon kode: 200, 500, 404 dll
 
-            if (httpCode == HTTP_CODE_OK) // kalau kode ok atau di range 200 an
+            if (httpCode == HTTP_CODE_OK)
             {
-                String respon = http.getString(); // ambil data yg didapat
-                Serial.println(respon);           // responnya
-
-                // Ambil status device
-                response = respon; // Angka 1 atau 0
+                String respon = http.getString(); // ambil data yang didapat
+                Serial.println(respon);
+                response = respon;
             }
             else if (httpCode == 302)
-            { // kasi kondisi khusus
+            {
                 loginDevice(macAddress);
             }
             else

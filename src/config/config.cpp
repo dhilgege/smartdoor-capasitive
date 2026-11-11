@@ -14,9 +14,9 @@ const char *customHostname     = ssidwifimanager;
 // =============================================================================
 
 // --- LED Internal (Bawaan Modul ESP32) ---
-const int LED_Red    = 38; // Default Red LED
-const int LED_Green  = 47;
-const int LED_Yellow = 48;
+const int LED_Red    = 4; // Aktif HIGH
+const int LED_Green  = 47; // Aktif HIGH
+const int LED_Yellow = 48; // Aktif HIGH
 
 // --- LED Eksternal (RGB Indikator) ---
 const int EXT_LED_RED   = 7;  // SPI_CS2
@@ -24,12 +24,24 @@ const int EXT_LED_GREEN = 17; // SPI_CS1
 const int EXT_LED_BLUE  = 17; // SPI_MOSI
 
 // --- Relay / Solenoid Pintu & Buzzer ---
-const int DoorPin    = 39; // Pin kontrol relay pintu
+const int DoorPin    = 18; // Pin kontrol relay pintu (aktif HIGH)
 const int BUZZER_PIN = 21; // Pin buzzer nada audio
+
+// --- Tombol Exit (Push On / NO) ---
+// J3 pin 6 (SPI_MISO), kaki lain tombol ke GND (J3 pin 7). Pakai INPUT_PULLUP.
+const int EXIT_BTN_PIN = 13;
 
 // --- Sensor & Tombol Deteksi ---
 const int detectPin = 12;  // Sensor deteksi pintu
 const int resetpin  = 200; // Reserved (belum dipakai)
+
+// --- W5500 Ethernet SPI ---
+const int W5500_MOSI = 35;
+const int W5500_MISO = 37;
+const int W5500_SCLK = 36;
+const int W5500_CS   = 39; 
+const int W5500_RST  = 38; 
+const int W5500_INT  = 40; // ESP-IDF driver membutuhkan pin INT untuk menerima DHCP/paket
 
 // --- RFID 125 kHz (RDM6300 / GWIOT 7941E) ---
 const int GWIOT_7941E_RX_PIN = 41;
@@ -93,5 +105,3 @@ bool doorTimerActive = false;
 
 // State Mode Firmware OTA
 volatile bool isOtaMode = false;
-
-
