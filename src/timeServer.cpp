@@ -18,10 +18,17 @@ void timeSetup()
 void printLocalTime()
 {
     struct tm timeinfo;
-    if (!getLocalTime(&timeinfo))
+    // Gunakan timeout singkat (10ms) agar tidak memblokir loop utama jika NTP belum sinkron
+    if (!getLocalTime(&timeinfo, 10))
     {
-        Serial.println("No time available (yet)");
-        timeSetup();
+        static unsigned long lastNtpRetry = 0;
+        if (millis() - lastNtpRetry > 60000 || lastNtpRetry == 0)
+        {
+            lastNtpRetry = millis();
+            Serial.println("[NTP] Waktu lokal belum tersedia, mencoba sinkronisasi...");
+            timeSetup();
+        }
+        return;
     }
     // Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
 

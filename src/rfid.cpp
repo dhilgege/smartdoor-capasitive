@@ -30,11 +30,29 @@
 // =============================================================================
 bool verifyRfid(const String &uidStr)
 {
+    String cleanUid = uidStr;
+    cleanUid.toLowerCase();
+    cleanUid.trim();
+
     for (int i = 0; i < rfidCount; i++)
     {
-        if (rfids[i].equalsIgnoreCase(uidStr) || rfids[i] == uidStr)
+        String serverUid = rfids[i];
+        serverUid.toLowerCase();
+        serverUid.trim();
+
+        if (serverUid == cleanUid || serverUid.equalsIgnoreCase(cleanUid))
         {
             return true; // UID cocok dengan salah satu data RFID yang diunduh
+        }
+
+        // Fleksibilitas format jika salah satu memiliki leading zero (misal "00a1b2c3" vs "a1b2c3")
+        String s1 = serverUid;
+        String s2 = cleanUid;
+        while (s1.startsWith("0") && s1.length() > 1) s1.remove(0, 1);
+        while (s2.startsWith("0") && s2.length() > 1) s2.remove(0, 1);
+        if (s1.length() > 0 && s1 == s2)
+        {
+            return true;
         }
     }
     return false; // UID tidak ditemukan
@@ -103,59 +121,99 @@ void rfidSetup()
 // =============================================================================
 // LOOP PEMBACAAN KARTU RFID
 // =============================================================================
+static uint32_t lastProcessedTag = 0;
+static unsigned long lastTagProcessTime = 0;
+const unsigned long RFID_COOLDOWN_MS = 2000; // Cooldown 2 detik untuk kartu yang sama
+
 void readRfid()
 {
     if (updateHistoryInProgress)
     {
-        Serial.println("Sedang dalam proses update, pembacaan RFID ditunda...");
-#if (ACTIVE_RFID_MODULE == RFID_MODULE_GWIOT7941E)
-        gwiot7941e.end();
-#endif
-        delay(50);
         return;
     }
 
 #if (ACTIVE_RFID_MODULE == RFID_MODULE_RDM6300)
-    uint32_t tagId = rdm6300.get_new_tag_id();
-    if (tagId)
+    uint32_t tagId = rdm6300.get_tag_id();
+
+    // Jika tidak ada kartu di dekat reader
+    if (tagId == 0)
     {
+        // Reset kartu terakhir setelah kartu diangkat selama minimal 500ms
+        if (lastProcessedTag != 0 && (millis() - lastTagProcessTime > 500))
+        {
+            lastProcessedTag = 0;
+        }
+        return;
+    }
+
+    // Jika ada kartu terdeteksi:
+    // Baca jika kartu berbeda ATAU kartu yang sama tetapi sudah lewat waktu cooldown
+    if (tagId != lastProcessedTag || (millis() - lastTagProcessTime >= RFID_COOLDOWN_MS))
+    {
+        lastProcessedTag = tagId;
+        lastTagProcessTime = millis();
+
         String uidStr = String(tagId, HEX);
         uidStr.toLowerCase();
         processRfidTag(uidStr);
-        delay(1500); // Cooldown setelah pembacaan
     }
-    delay(10);
 
 #elif (ACTIVE_RFID_MODULE == RFID_MODULE_GWIOT7941E)
     if (gwiot7941e.update())
     {
-        String uidStr = String(gwiot7941e.getLastTagId(), HEX);
-        uidStr.toLowerCase();
-        processRfidTag(uidStr);
-        delay(1500); // Cooldown setelah pembacaan
+        uint32_t tagId = gwiot7941e.getLastTagId();
+        if (tagId != 0 && (tagId != lastProcessedTag || (millis() - lastTagProcessTime >= RFID_COOLDOWN_MS)))
+        {
+            lastProcessedTag = tagId;
+            lastTagProcessTime = millis();
+
+            String uidStr = String(tagId, HEX);
+            uidStr.toLowerCase();
+            processRfidTag(uidStr);
+        }
     }
-    delay(50);
+    else
+    {
+        if (lastProcessedTag != 0 && (millis() - lastTagProcessTime > 500))
+        {
+            lastProcessedTag = 0;
+        }
+    }
 
 #elif (ACTIVE_RFID_MODULE == RFID_MODULE_MFRC522)
     if (!mfrc522.PICC_IsNewCardPresent() || !mfrc522.PICC_ReadCardSerial())
     {
-        delay(10);
+        if (lastProcessedTag != 0 && (millis() - lastTagProcessTime > 500))
+        {
+            lastProcessedTag = 0;
+        }
         return;
     }
 
-    String uidStr = "";
-    for (byte i = 0; i < mfrc522.uid.size; i++)
+    uint32_t tagId = 0;
+    for (byte i = 0; i < mfrc522.uid.size && i < 4; i++)
     {
-        uidStr += String(mfrc522.uid.uidByte[i] < 0x10 ? "0" : "");
-        uidStr += String(mfrc522.uid.uidByte[i], HEX);
+        tagId = (tagId << 8) | mfrc522.uid.uidByte[i];
     }
-    uidStr.toLowerCase();
 
-    processRfidTag(uidStr);
+    if (tagId != lastProcessedTag || (millis() - lastTagProcessTime >= RFID_COOLDOWN_MS))
+    {
+        lastProcessedTag = tagId;
+        lastTagProcessTime = millis();
+
+        String uidStr = "";
+        for (byte i = 0; i < mfrc522.uid.size; i++)
+        {
+            uidStr += String(mfrc522.uid.uidByte[i] < 0x10 ? "0" : "");
+            uidStr += String(mfrc522.uid.uidByte[i], HEX);
+        }
+        uidStr.toLowerCase();
+
+        processRfidTag(uidStr);
+    }
 
     mfrc522.PICC_HaltA();
     mfrc522.PCD_StopCrypto1();
-    delay(1500); // Cooldown setelah pembacaan
 #endif
 }
 

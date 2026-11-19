@@ -66,14 +66,13 @@ static bool            mpr121Ready = false;
 
 // =======================================================================
 // Pemetaan layout keypad 4 kolom x 3 baris:
-// Baris 1: Elektroda 0,  1,  2,  3 -> '1', '2', '3', 'A'
-// Baris 2: Elektroda 4,  5,  6,  7 -> '4', '5', '6', 'B'
-// Baris 3: Elektroda 8,  9, 10, 11 -> '7', '8', '9', 'C'
+// Angka berada di sebelah KIRI (1, 4, 7 di kolom paling kiri)
+// Huruf berada di sebelah KANAN (A, B, C di kolom paling kanan)
 // =======================================================================
 static const char KEYPAD_LAYOUT_4X3[12] = {
-    '7', '8', '9', 'C',   // ELE 8, 9, 10, 11
-    '4', '5', '6', 'B',   // ELE 4, 5, 6, 7
-    '1', '2', '3', 'A',   // ELE 0, 1, 2, 3
+    'C', '9', '8', '7',   // ELE 0, 1, 2, 3   (Kanan Bawah 'C' <- ... <- Kiri Bawah '7')
+    'B', '6', '5', '4',   // ELE 4, 5, 6, 7   (Kanan Tengah 'B' <- ... <- Kiri Tengah '4')
+    'A', '3', '2', '1',   // ELE 8, 9, 10, 11 (Kanan Atas 'A' <- ... <- Kiri Atas '1')
 };
 
 // -----------------------------------------------------------------------
@@ -254,21 +253,21 @@ void handleKeypad()
                 ActivateDoorTimer(3000);
                 playSuccessTone();
             }
-            else if (inputPin == "##01##")
+            else if (inputPin == "##01##" || inputPin == "AA11AA")
             {
                 playResetTone(200);
                 Serial.println("[Keypad] Restart Device");
                 delay(500);
                 ESP.restart();
             }
-            else if (inputPin == "##02##")
+            else if (inputPin == "##02##" || inputPin == "AA12AA")
             {
                 playResetTone(200);
                 Serial.println("[Keypad] Reset EEPROM ESP");
                 delay(500);
                 resetEpproomWifi();
             }
-            else if (inputPin == "##03##")
+            else if (inputPin == "##03##" || inputPin == "AA13AA")
             {
                 playResetTone(200);
                 Serial.println("[Keypad] Resetting Wifi & Setup Wifi");
@@ -276,7 +275,7 @@ void handleKeypad()
                 resetEpproomWifi();
                 setupWifi();
             }
-            else if (inputPin == "##04##")
+            else if (inputPin == "##04##" || inputPin == "AA14AA")
             {
                 playResetTone(200);
                 Serial.println("[Keypad] Force OTA calling");
@@ -284,7 +283,7 @@ void handleKeypad()
                 enterOtaMode();
                 setupWifi();
             }
-            else if (inputPin == "##05##")
+            else if (inputPin == "##05##" || inputPin == "AA15AA")
             {
                 playResetTone(200);
                 Serial.println("[Keypad] Request get RFID");

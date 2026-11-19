@@ -164,10 +164,14 @@ bool updateInProgress = false; // Cegah duplikasi pengambilan data
 
 void midnightTask()
 {
+    // Cek maksimal 1 detik sekali
+    static unsigned long lastMidnightCheck = 0;
+    if (millis() - lastMidnightCheck < 1000) return;
+    lastMidnightCheck = millis();
+
     struct tm timeinfo;
-    if (!getLocalTime(&timeinfo))
+    if (!getLocalTime(&timeinfo, 10))
     {
-        Serial.println("Waktu lokal belum tersedia");
         return;
     }
 
@@ -187,6 +191,14 @@ void getOneTime()
 {
     if (getOneTimeDone == false)
     {
+        static unsigned long lastGetOneTimeAttempt = 0;
+        // Jeda 10 detik antar percobaan jika sebelumnya gagal agar tidak membebani loop
+        if (lastGetOneTimeAttempt != 0 && millis() - lastGetOneTimeAttempt < 10000)
+        {
+            return;
+        }
+        lastGetOneTimeAttempt = millis();
+
         Serial.println("Memulai getOneTime...");
         if (getNewPin())
         {
